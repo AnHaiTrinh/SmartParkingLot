@@ -1,0 +1,12 @@
+app/__pycache__
+venv/
+Dockerfile
+.dockerignore
+.pytest_cache
+docker-compose.yml
+.gitignore
+.idea
+.git
+
+# Ignore mount volume
+.db_data

@@ -16,3 +16,8 @@ class UserOut(BaseUser):
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
     created_at: datetime
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

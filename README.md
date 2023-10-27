@@ -13,13 +13,18 @@ git clone https://github.com/AnHaiTrinh/SmartParkingLotBackend.git
 ```
 
 ## Run the project
-Create a *.env* file in the root directory with the following content:
+Create an *app.env* file in the root directory with the following content:
 ```
-DB_DATABASE=
-DB_USER=
-DB_PASSWORD=
-DB_HOST=
-DB_PORT=
+DB_DATABASE
+DB_USER
+DB_PASSWORD
+DB_HOST
+DB_PORT
+JWT_ACCESS_SECRET_KEY
+JWT_REFRESH_SECRET_KEY
+ACCESS_TOKEN_EXPIRE_MINUTES
+REFRESH_TOKEN_EXPIRE_DAYS
+ALGORITHM
 ```
 ### Run with Docker (Preferred)
 Make sure Docker and docker-compose are installed in your machine. 
@@ -31,7 +36,14 @@ docker-compose -v
 ```
 If not installed, follow the instructions in the [Docker website](https://docs.docker.com/get-docker/).
 
-Then, run the following command in the root directory:
+Create a *db.env* file in the root directory with the following content:
+```
+POSTGRES_DB
+POSTGRES_USER
+POSTGRES_PASSWORD
+```
+
+Make sure it matches the environment variables declared in *app.env*. Then, run the following command in the root directory:
 ```bash
 docker-compose up -d
 ```
@@ -43,7 +55,8 @@ docker-compose down
 ```
 
 ### Run locally
-Make sure you have Python 3.9 installed in your machine. and access to an PostgreSQL database.
+Make sure you have Python 3.9 installed in your machine. 
+ALso replace the environment variables in *app.env* with the values corresponding to your Postgres instance.
 
 Create a virtual environment and activate it:
 ```bash

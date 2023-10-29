@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from ..models.schemas import Token, UserOut
 from ..models.models import User
 from ..dependencies.db_connection import DatabaseDependency
-from ..dependencies.oauth2 import CurrentUserDependency
+from ..dependencies.oauth2 import CurrentActiveUserDependency
 from ..utils.password import verify_password
 from ..utils.jwt import create_jwt_token, verify_jwt_token
 
@@ -45,7 +45,7 @@ def login(response: Response, db: DatabaseDependency, user_credentials: OAuth2Pa
 
 
 @router.get('/users/me', response_model=UserOut, status_code=status.HTTP_200_OK)
-def get_current_user(current_user: CurrentUserDependency):
+def get_current_user(current_user: CurrentActiveUserDependency):
     return current_user
 
 
@@ -70,13 +70,13 @@ def refresh_access_token(db: DatabaseDependency, jwt: Annotated[Union[str, None]
             'access_token': access_token,
             'token_type': 'bearer'
         }
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Could not validate credentials')
 
 
 @router.post('/logout', status_code=status.HTTP_200_OK)
-def logout(response: Response, current_user: CurrentUserDependency, db: DatabaseDependency):
-    current_user.refresh_token = None
+def logout(response: Response, current_active_user: CurrentActiveUserDependency, db: DatabaseDependency):
+    current_active_user.refresh_token = None
     db.commit()
     response.delete_cookie(key='jwt')
     return {

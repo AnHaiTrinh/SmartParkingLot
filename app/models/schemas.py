@@ -13,9 +13,17 @@ class UserCreate(BaseUser):
 
 class UserOut(BaseUser):
     id: int
-    is_active: Optional[bool] = True
-    is_superuser: Optional[bool] = False
+    is_active: bool
+    is_superuser: bool
     created_at: datetime
+
+
+class PasswordUpdate(BaseModel):
+    password: str
+
+
+class UserUpdate(BaseModel):
+    is_superuser: bool
 
 
 class Token(BaseModel):

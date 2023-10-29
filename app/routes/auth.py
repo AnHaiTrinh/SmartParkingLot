@@ -4,11 +4,11 @@ from typing import Annotated, Union
 from fastapi import APIRouter, HTTPException, Depends, status, Response, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..models.schemas import Token, UserOut
+from ..models.schemas import Token, UserOut, UserCreate
 from ..models.models import User
 from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentActiveUserDependency
-from ..utils.password import verify_password
+from ..utils.password import verify_password, hash_password
 from ..utils.jwt import create_jwt_token, verify_jwt_token
 
 router = APIRouter(
@@ -81,4 +81,20 @@ def logout(response: Response, current_active_user: CurrentActiveUserDependency,
     response.delete_cookie(key='jwt')
     return {
         'message': 'Successfully logged out'
+    }
+
+
+@router.post('/change-password', status_code=status.HTTP_200_OK)
+def change_password(user: UserCreate,
+                    db: DatabaseDependency,
+                    current_active_user: CurrentActiveUserDependency,
+                    new_password: str):
+
+    if not verify_password(user.password, current_active_user.password):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not authorized')
+    hashed_password = hash_password(new_password)
+    current_active_user.password = hashed_password
+    db.commit()
+    return {
+        'message': 'Password changed successfully'
     }

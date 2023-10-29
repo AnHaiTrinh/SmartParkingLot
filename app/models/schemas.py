@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional, List
 from datetime import datetime
 
 
@@ -16,10 +15,6 @@ class UserOut(BaseUser):
     is_active: bool
     is_superuser: bool
     created_at: datetime
-
-
-class PasswordUpdate(BaseModel):
-    password: str
 
 
 class UserUpdate(BaseModel):

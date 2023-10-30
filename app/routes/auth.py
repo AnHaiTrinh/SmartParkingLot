@@ -80,13 +80,7 @@ def logout(response: Response, current_active_user: CurrentActiveUserDependency,
 
 
 @router.post('/change-password', status_code=status.HTTP_200_OK)
-def change_password(user: UserCreate,
-                    db: DatabaseDependency,
-                    current_active_user: CurrentActiveUserDependency,
-                    new_password: str):
-
-    if not verify_password(user.password, current_active_user.password):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not authorized')
+def change_password(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency, new_password: str):
     hashed_password = hash_password(new_password)
     current_active_user.password = hashed_password
     db.commit()

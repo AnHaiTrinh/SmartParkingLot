@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 
@@ -33,7 +34,7 @@ def get_current_user(current_user: CurrentActiveUserDependency):
     return current_user
 
 
-@router.get('/', response_model=UserOut, status_code=status.HTTP_200_OK)
+@router.get('/', response_model=List[UserOut], status_code=status.HTTP_200_OK)
 def get_all_users(db: DatabaseDependency, current_user: CurrentActiveUserDependency):
     if not current_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')

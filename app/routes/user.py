@@ -28,6 +28,11 @@ def create_user(user: UserCreate, db: DatabaseDependency):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Username already exists')
 
 
+@router.get('/me', response_model=UserOut, status_code=status.HTTP_200_OK)
+def get_current_user(current_user: CurrentActiveUserDependency):
+    return current_user
+
+
 @router.get('/', response_model=UserOut, status_code=status.HTTP_200_OK)
 def get_all_users(db: DatabaseDependency, current_user: CurrentActiveUserDependency):
     if not current_user.is_superuser:

@@ -44,11 +44,6 @@ def login(response: Response, db: DatabaseDependency, user_credentials: OAuth2Pa
     }
 
 
-@router.get('/users/me', response_model=UserOut, status_code=status.HTTP_200_OK)
-def get_current_user(current_user: CurrentActiveUserDependency):
-    return current_user
-
-
 @router.get("/refresh", response_model=Token)
 def refresh_access_token(db: DatabaseDependency, jwt: Annotated[Union[str, None], Cookie()] = None):
     if jwt is None:

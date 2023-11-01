@@ -21,3 +21,8 @@ class UserOut(BaseUser):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class ChangeUserPasswordDto:
+    old_password: str
+    new_password: str
+    retype_password: str

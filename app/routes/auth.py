@@ -4,7 +4,7 @@ from typing import Annotated, Union
 from fastapi import APIRouter, HTTPException, Depends, status, Response, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..models.schemas import Token, UserOut
+from ..models.schemas import Token, UserOut, ChangeUserPasswordDto
 from ..models.models import User
 from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentUserDependency
@@ -47,6 +47,7 @@ def login(response: Response, db: DatabaseDependency, user_credentials: OAuth2Pa
 @router.get('/users/me', response_model=UserOut, status_code=status.HTTP_200_OK)
 def get_current_user(current_user: CurrentUserDependency):
     return current_user
+
 
 
 @router.get("/refresh", response_model=Token)

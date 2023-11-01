@@ -32,7 +32,7 @@ Check by running:
 
 ```bash
 docker -v
-docker-compose -v
+docker compose -v
 ```
 If not installed, follow the instructions in the [Docker website](https://docs.docker.com/get-docker/).
 
@@ -45,13 +45,13 @@ POSTGRES_PASSWORD
 
 Make sure it matches the environment variables declared in *app.env*. Then, run the following command in the root directory:
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 Once the containers are up and running, you can access the API at http://localhost:8000.
 
 To remove the containers, run:
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Run locally

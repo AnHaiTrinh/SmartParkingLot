@@ -4,11 +4,11 @@ from typing import Annotated, Union
 from fastapi import APIRouter, HTTPException, Depends, status, Response, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..models.schemas import Token, UserOut, ChangeUserPasswordDto
+from ..models.schemas import Token, UserOut, UserCreate
 from ..models.models import User
 from ..dependencies.db_connection import DatabaseDependency
-from ..dependencies.oauth2 import CurrentUserDependency
-from ..utils.password import verify_password
+from ..dependencies.oauth2 import CurrentActiveUserDependency
+from ..utils.password import verify_password, hash_password
 from ..utils.jwt import create_jwt_token, verify_jwt_token
 
 router = APIRouter(
@@ -49,7 +49,6 @@ def get_current_user(current_user: CurrentUserDependency):
     return current_user
 
 
-
 @router.get("/refresh", response_model=Token)
 def refresh_access_token(db: DatabaseDependency, jwt: Annotated[Union[str, None], Cookie()] = None):
     if jwt is None:
@@ -71,15 +70,25 @@ def refresh_access_token(db: DatabaseDependency, jwt: Annotated[Union[str, None]
             'access_token': access_token,
             'token_type': 'bearer'
         }
-    except Exception as e:
+    except Exception:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Could not validate credentials')
 
 
 @router.post('/logout', status_code=status.HTTP_200_OK)
-def logout(response: Response, current_user: CurrentUserDependency, db: DatabaseDependency):
-    current_user.refresh_token = None
+def logout(response: Response, current_active_user: CurrentActiveUserDependency, db: DatabaseDependency):
+    current_active_user.refresh_token = None
     db.commit()
     response.delete_cookie(key='jwt')
     return {
         'message': 'Successfully logged out'
+    }
+
+
+@router.post('/change-password', status_code=status.HTTP_200_OK)
+def change_password(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency, new_password: str):
+    hashed_password = hash_password(new_password)
+    current_active_user.password = hashed_password
+    db.commit()
+    return {
+        'message': 'Password changed successfully'
     }

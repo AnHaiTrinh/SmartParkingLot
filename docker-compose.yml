@@ -12,7 +12,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_started
     restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+    networks:
+      - backend
+    volumes:
+      - .\.redis_data:/data
 
   db:
     image: postgres:16.0-alpine

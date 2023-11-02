@@ -14,28 +14,26 @@ router = APIRouter(
 )
 
 @router.get('/', response_model=List[ParkingLotOut], status_code=status.HTTP_200_OK)
-def get_all_parking_lots(_: CurrentActiveUserDependency, db: DatabaseDependency):
-    parking_lots = db.query(ParkingLot).filter(ParkingLot.is_deleted == False).all()
+def get_all_parking_lots(current_user: CurrentActiveUserDependency, db: DatabaseDependency):
+    query = db.query(ParkingLot).filter(ParkingLot.is_deleted == False)
+    if not current_user.is_superuser:
+        query = query.filter(ParkingLot.owner_id == current_user.id)
+    parking_lots = query.all()
     return parking_lots
 
 @router.post('/', response_model=ParkingLotCreateOut, status_code=status.HTTP_201_CREATED)
-def create_parking_lot(_: CurrentActiveUserDependency, parking_lot: ParkingLotCreate, db: DatabaseDependency):
+def create_parking_lot(current_user: CurrentActiveUserDependency, parking_lot: ParkingLotCreate, db: DatabaseDependency):
     try:
         new_parking_lot = ParkingLot(**parking_lot.model_dump())
-
-        # Check if the record with the same name exists
         existing_parking_lot = db.query(ParkingLot).filter(ParkingLot.name == new_parking_lot.name, ParkingLot.is_deleted == True).first()
         if existing_parking_lot:
-            # Generate a new name for the existing record
             i = 1
             new_name = f'{new_parking_lot.name} ({i})'
             while db.query(ParkingLot).filter(ParkingLot.name == new_name).first():
                 i += 1
                 new_name = f'{new_parking_lot.name} ({i})'
-
-            # Update the existing record
             existing_parking_lot.name = new_name
-
+        new_parking_lot.owner_id = current_user.id
         db.add(new_parking_lot)
         db.commit()
         db.refresh(new_parking_lot)
@@ -44,8 +42,11 @@ def create_parking_lot(_: CurrentActiveUserDependency, parking_lot: ParkingLotCr
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Parking lot already exists')
 
 @router.get('/{parking_lot_id}', response_model=ParkingLotOut, status_code=status.HTTP_200_OK)
-def get_parking_lot_id(_: CurrentActiveUserDependency, parking_lot_id: int, db:DatabaseDependency):
-    parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False).first()
+def get_parking_lot_id(current_user: CurrentActiveUserDependency, parking_lot_id: int, db:DatabaseDependency):
+    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False)
+    if not current_user.is_superuser:
+        query = query.filter(ParkingLot.owner_id == current_user.id)
+    parking_lot = query.first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')
     return parking_lot
@@ -53,9 +54,12 @@ def get_parking_lot_id(_: CurrentActiveUserDependency, parking_lot_id: int, db:D
 @router.put('/{parking_lot_id}', response_model=ParkingLotOut, status_code=status.HTTP_200_OK)
 def update_parking_lot(parking_lot_id: int,
                        parking_lot_update: ParkingLotUpdate,
-                       _: CurrentActiveUserDependency, 
+                       current_user: CurrentActiveUserDependency, 
                        db: DatabaseDependency):
-    parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False).first()
+    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False)
+    if not current_user.is_superuser:
+        query = query.filter(ParkingLot.owner_id == current_user.id)
+    parking_lot = query.first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')
     parking_lot.name = parking_lot_update.name
@@ -66,8 +70,11 @@ def update_parking_lot(parking_lot_id: int,
     return parking_lot
 
 @router.delete('/{parking_lot_id}', status_code=status.HTTP_204_NO_CONTENT)
-def delete_parking_lot(parking_lot_id: int,_: CurrentActiveUserDependency, db:DatabaseDependency):
-    parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False).first()
+def delete_parking_lot(parking_lot_id: int,current_user: CurrentActiveUserDependency, db:DatabaseDependency):
+    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False)
+    if not current_user.is_superuser:
+        query = query.filter(ParkingLot.owner_id == current_user.id)
+    parking_lot = query.first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')
     parking_lot.is_deleted = True

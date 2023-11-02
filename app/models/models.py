@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.orm import relationship
@@ -25,7 +25,9 @@ class ParkingLot(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     name = Column(String, unique=True, index=True)
-    address = Column(String)
+    longitude  = Column(Float)
+    latitude  = Column(Float)
+    owner_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_deleted = Column(Boolean, default=False)
@@ -38,7 +40,6 @@ class Vehicle(Base):
     license_plate = Column(String, unique=True, index=True)
     vehicle_type = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
-    payment_info = Column(String)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_deleted = Column(Boolean, default=False)
@@ -51,21 +52,6 @@ class ParkingSpaceAvailability(Base):
     parking_lot_id = Column(Integer, ForeignKey("parking_lots.id"))
     vehicle_type = Column(String)
     available_spaces = Column(Integer, default=0)
-    created_at = Column(TIMESTAMP, server_default=text("now()"))
-    updated_at = Column(TIMESTAMP, server_default=text("NULL"))
-    is_deleted = Column(Boolean, default=False)
-    deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
-    
-class Transaction(Base):
-    __tablename__ = "transactions"
-
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    parking_lot_id = Column(Integer, ForeignKey("parking_lots.id"))
-    vehicle_id = Column(Integer, ForeignKey("vehicles.id"))
-    start_time = Column(TIMESTAMP, server_default=text("now()"))
-    end_time = Column(TIMESTAMP)
-    parking_fee = Column(Integer, default=0)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_deleted = Column(Boolean, default=False)
@@ -90,10 +76,10 @@ class ActivityLog(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     activity_type = Column(String)
+    license_plate = Column(String)
+    note = Column(String)
+    timestamp = Column(TIMESTAMP, server_default=text("now()"))
     user_id = Column(Integer, ForeignKey("users.id"))
     parking_lot_id = Column(Integer, ForeignKey("parking_lots.id"))
-    timestamp = Column(TIMESTAMP, server_default=text("now()"))
-    created_at = Column(TIMESTAMP, server_default=text("now()"))
-    updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_deleted = Column(Boolean, default=False)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))

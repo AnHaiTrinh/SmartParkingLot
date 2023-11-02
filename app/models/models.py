@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Enum as SQLAlchemyEnum
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.orm import relationship
@@ -6,10 +6,6 @@ from app.configs.db_configs import Base
 from enum import Enum
 
 # Định nghĩa kiểu enum cho vehicle_type
-class VehicleType(Enum):
-    CAR = "car"
-    MOTORCYCLE = "motorcycle"
-    BICYCLE = "bicycle"
 
 class User(Base):
     __tablename__ = "users"
@@ -40,7 +36,7 @@ class Vehicle(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     license_plate = Column(String, unique=True, index=True)
-    vehicle_type = Column(SQLAlchemyEnum(VehicleType, name="vehicle_types"))
+    vehicle_type = Column(String)
     owner_id = Column(Integer, ForeignKey("users.id"))
     payment_info = Column(String)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
@@ -53,13 +49,13 @@ class ParkingSpaceAvailability(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     parking_lot_id = Column(Integer, ForeignKey("parking_lots.id"))
-    vehicle_type = Column(SQLAlchemyEnum(VehicleType, name="vehicle_types"))
+    vehicle_type = Column(String)
     available_spaces = Column(Integer, default=0)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_deleted = Column(Boolean, default=False)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
-
+    
 class Transaction(Base):
     __tablename__ = "transactions"
 

@@ -2,8 +2,6 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-from ..models.models import VehicleType
-
 class BaseUser(BaseModel):
     username: str
 
@@ -62,28 +60,27 @@ class BaseVehicle(BaseModel):
     license_plate: str
     
 class VehicleCreate(BaseVehicle):
-    vehicle_type: VehicleType
-    owner_id: str
+    vehicle_type: str
     payment_info: str
 
 class VehicleUpdate(BaseModel):
     license_plate: str
-    vehicle_type: VehicleType
+    vehicle_type: str
     payment_info: str
 
 class VehicleCreateOut(BaseModel):
     id: int
     license_plate: str
-    vehicle_type: VehicleType
-    owner_id: str
+    vehicle_type: str
+    owner_id: int
     payment_info: str
-    create_at: datetime
+    created_at: datetime
 
 class VehicleOut(BaseModel):
     id: int
     license_plate: str
-    vehicle_type: VehicleType
-    owner_id: str
+    vehicle_type: str
+    owner_id: int
     payment_info: str
-    create_at: datetime
-    update_at: Optional[datetime]
+    created_at: datetime
+    updated_at: Optional[datetime]

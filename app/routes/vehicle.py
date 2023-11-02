@@ -3,11 +3,12 @@ from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from typing import List
 
-from ..models.schemas import VehicleCreate, VehicleUpdate, VehicleCreateOut, VehicleOut, VehicleType
+from ..models.schemas import VehicleCreate, VehicleUpdate, VehicleCreateOut, VehicleOut
 from ..models.models import Vehicle
 from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentActiveUserDependency
 
+import base64
 
 router = APIRouter(
     prefix='/vehicles',
@@ -20,7 +21,7 @@ def get_all_vehicles(_: CurrentActiveUserDependency, db: DatabaseDependency):
     return vehicles
 
 @router.post('/', response_model=VehicleCreateOut, status_code=status.HTTP_201_CREATED)
-def create_vehicle(vehicle: VehicleCreate,_: CurrentActiveUserDependency, db: DatabaseDependency):
+def create_vehicle(vehicle: VehicleCreate,current_user: CurrentActiveUserDependency, db: DatabaseDependency):
     try:
         new_vehicle = Vehicle(**vehicle.model_dump())
         existing_vehicle = db.query(Vehicle).filter(Vehicle.license_plate == new_vehicle.license_plate, Vehicle.is_deleted == True).first()
@@ -32,9 +33,11 @@ def create_vehicle(vehicle: VehicleCreate,_: CurrentActiveUserDependency, db: Da
                 new_license_plate = f'{new_vehicle.license_plate} ({i})'
             existing_vehicle.license_plate = new_license_plate
 
+        new_vehicle.owner_id = current_user.id
         db.add(new_vehicle)
         db.commit()
         db.refresh(new_vehicle)
+        return new_vehicle
     except IntegrityError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='vehicle already exists')
 

@@ -32,7 +32,7 @@ def login(response: Response, db: DatabaseDependency,
     )
 
     refresh_token = create_jwt_token(
-        data={'user_id': user.id, 'is_superuser': user.is_superuser},
+        data={'user_id': user.id},
         secret_key=os.getenv('JWT_REFRESH_SECRET_KEY'),
         expiry={'days': int(os.getenv('REFRESH_TOKEN_EXPIRE_DAYS'))}
     )

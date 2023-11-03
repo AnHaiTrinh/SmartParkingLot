@@ -36,7 +36,7 @@ def get_current_user(current_user: CurrentActiveUserDependency):
     return current_user
 
 #admin
-@router.get('/', response_model=List[UserOut], status_code=status.HTTP_200_OK)
+@router.get('/admin/', response_model=List[UserOut], status_code=status.HTTP_200_OK)
 def get_all_users(db: DatabaseDependency, current_user: CurrentActiveUserDependency):
     if not current_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
@@ -44,7 +44,7 @@ def get_all_users(db: DatabaseDependency, current_user: CurrentActiveUserDepende
     return users
 
 
-@router.get('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
+@router.get('/admin/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
 def get_user_by_id(user_id: int, db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
     if current_active_user.id != user_id and not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
@@ -53,7 +53,7 @@ def get_user_by_id(user_id: int, db: DatabaseDependency, current_active_user: Cu
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     return user
 
-@router.put('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
+@router.put('/admin/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
 def update_user(user_id: int,
                 user_update: UserUpdate,
                 db: DatabaseDependency,
@@ -71,7 +71,7 @@ def update_user(user_id: int,
     return user
 
 
-@router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
+@router.delete('/admin/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
     if current_active_user.id != user_id and not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')

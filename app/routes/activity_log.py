@@ -29,3 +29,26 @@ def create_activity_log(activity_log: ActivityLogCreate, current_user: CurrentAc
     db.commit()
     db.refresh(new_activity_log)
     return new_activity_log
+
+@router.get('/{activity_log_id}', response_model=ActivityLogOut, status_code=status.HTTP_200_OK)
+def get_activity_log_id(activity_log_id: int, current_user: CurrentActiveUserDependency, db: DatabaseDependency):
+    query = db.query(ActivityLog).filter(ActivityLog.id == activity_log_id, ActivityLog.is_deleted == False)
+    if not current_user.is_superuser:
+        query = query.filter(ActivityLog.owner_id == current_user.id)
+    activity_log = query.first()
+    if not activity_log:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='activity log not found')
+    return activity_log
+
+@router.delete('/{activity_log_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_activity_log(activity_log_id: int, current_user: CurrentActiveUserDependency, db:DatabaseDependency):
+    query = db.query(ActivityLog).filter(ActivityLog.id == activity_log_id, ActivityLog.is_deleted == False)
+    if not current_user.is_superuser:
+        query = query.filter(ActivityLog.owner_id == current_user.id)
+    activity_log = query.first()
+    if not activity_log:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='activity log not found')
+    activity_log.is_deleted = True
+    activity_log.deleted_at = datetime.now()
+    db.commit()    
+

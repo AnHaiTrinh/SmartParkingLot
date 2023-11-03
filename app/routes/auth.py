@@ -65,7 +65,6 @@ def refresh_access_token(redis_client: RedisDependency,
             secret_key=os.getenv('JWT_ACCESS_SECRET_KEY'),
             expiry={'minutes': int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))}
         )
-        print('here')
         return {
             'access_token': access_token,
             'token_type': 'bearer'

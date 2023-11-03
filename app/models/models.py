@@ -3,9 +3,6 @@ from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.orm import relationship
 from app.configs.db_configs import Base
-from enum import Enum
-
-# Định nghĩa kiểu enum cho vehicle_type
 
 class User(Base):
     __tablename__ = "users"
@@ -79,6 +76,7 @@ class ActivityLog(Base):
     license_plate = Column(String)
     note = Column(String)
     timestamp = Column(TIMESTAMP, server_default=text("now()"))
+    owner_id = Column(Integer, ForeignKey("users.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     parking_lot_id = Column(Integer, ForeignKey("parking_lots.id"))
     is_deleted = Column(Boolean, default=False)

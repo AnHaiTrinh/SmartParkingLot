@@ -9,11 +9,11 @@ from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentActiveUserDependency
 
 router = APIRouter(
-    prefix='/parking_lots',
+    prefix='/api/parking_lots',
     tags=['ParkingLots']
 )
 
-@router.get('/', response_model=List[ParkingLotOut], status_code=status.HTTP_200_OK)
+@router.get('/api/', response_model=List[ParkingLotOut], status_code=status.HTTP_200_OK)
 def get_all_parking_lots(current_user: CurrentActiveUserDependency, db: DatabaseDependency):
     query = db.query(ParkingLot).filter(ParkingLot.is_deleted == False)
     if not current_user.is_superuser:
@@ -21,7 +21,7 @@ def get_all_parking_lots(current_user: CurrentActiveUserDependency, db: Database
     parking_lots = query.all()
     return parking_lots
 
-@router.post('/', response_model=ParkingLotCreateOut, status_code=status.HTTP_201_CREATED)
+@router.post('/api/', response_model=ParkingLotCreateOut, status_code=status.HTTP_201_CREATED)
 def create_parking_lot(current_user: CurrentActiveUserDependency, parking_lot: ParkingLotCreate, db: DatabaseDependency):
     try:
         new_parking_lot = ParkingLot(**parking_lot.model_dump())
@@ -41,7 +41,7 @@ def create_parking_lot(current_user: CurrentActiveUserDependency, parking_lot: P
     except IntegrityError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Parking lot already exists')
 
-@router.get('/{parking_lot_id}', response_model=ParkingLotOut, status_code=status.HTTP_200_OK)
+@router.get('/api/{parking_lot_id}', response_model=ParkingLotOut, status_code=status.HTTP_200_OK)
 def get_parking_lot_id(current_user: CurrentActiveUserDependency, parking_lot_id: int, db:DatabaseDependency):
     query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False)
     if not current_user.is_superuser:

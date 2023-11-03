@@ -80,3 +80,16 @@ class VehicleOut(BaseModel):
 
 
 #ActivityLog
+class ActivityLogCreate(BaseModel):
+    activity_type: str
+    license_plate: str
+    note: str
+    user_id: Optional[int]
+    packing_lot_id: Optional[int]
+class ActivityLogOut(BaseModel):
+    activity_type: str
+    license_plate: str
+    note: str
+    timestamp: datetime
+    user_id: Optional[int]
+    packing_lot_id: Optional[int]

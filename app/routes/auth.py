@@ -12,6 +12,7 @@ from ..utils.password import verify_password, hash_password
 from ..utils.jwt import create_jwt_token, verify_jwt_token
 
 router = APIRouter(
+    prefix='/api',
     tags=['Auth']
 )
 

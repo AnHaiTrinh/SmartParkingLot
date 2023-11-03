@@ -10,7 +10,7 @@ from ..dependencies.oauth2 import CurrentActiveUserDependency
 from ..utils.password import hash_password
 
 router = APIRouter(
-    prefix='/users',
+    prefix='/api/users',
     tags=['Users']
 )
 

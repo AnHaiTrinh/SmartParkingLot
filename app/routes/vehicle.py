@@ -11,7 +11,7 @@ from ..dependencies.oauth2 import CurrentActiveUserDependency
 import base64
 
 router = APIRouter(
-    prefix='/vehicles',
+    prefix='/api/vehicles',
     tags=['Vehicles']
 )
 

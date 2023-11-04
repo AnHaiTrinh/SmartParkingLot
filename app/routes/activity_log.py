@@ -41,7 +41,7 @@ def get_activity_log_id(activity_log_id: int, current_active_user: CurrentActive
     query = db.query(ActivityLog)
     if not current_active_user.is_superuser:
         query = query.join(User, ActivityLog.user_id == User.id).filter(User.id == current_active_user.id)
-    activity_log = query.first()
+    activity_log = query.filter(ActivityLog.id == activity_log_id).first()
     if not activity_log:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='activity log not found')
     return activity_log  

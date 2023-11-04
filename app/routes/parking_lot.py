@@ -9,13 +9,13 @@ from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentActiveUserDependency
 
 router = APIRouter(
-    prefix='/api/parking_lots',
+    prefix='/parking_lots',
     tags=['ParkingLots']
 )
 
 @router.get('/', response_model=List[ParkingLotOut], status_code=status.HTTP_200_OK)
 def get_all_parking_lots(current_user: CurrentActiveUserDependency, db: DatabaseDependency):
-    query = db.query(ParkingLot).filter(ParkingLot.is_deleted == False)
+    query = db.query(ParkingLot).filter(ParkingLot.is_active == True)
     if not current_user.is_superuser:
         query = query.filter(ParkingLot.owner_id == current_user.id)
     parking_lots = query.all()
@@ -43,7 +43,7 @@ def create_parking_lot(current_user: CurrentActiveUserDependency, parking_lot: P
 
 @router.get('/{parking_lot_id}', response_model=ParkingLotOut, status_code=status.HTTP_200_OK)
 def get_parking_lot_id(current_user: CurrentActiveUserDependency, parking_lot_id: int, db:DatabaseDependency):
-    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False)
+    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True)
     if not current_user.is_superuser:
         query = query.filter(ParkingLot.owner_id == current_user.id)
     parking_lot = query.first()
@@ -56,7 +56,7 @@ def update_parking_lot(parking_lot_id: int,
                        parking_lot_update: ParkingLotUpdate,
                        current_user: CurrentActiveUserDependency, 
                        db: DatabaseDependency):
-    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False)
+    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True)
     if not current_user.is_superuser:
         query = query.filter(ParkingLot.owner_id == current_user.id)
     parking_lot = query.first()
@@ -71,13 +71,13 @@ def update_parking_lot(parking_lot_id: int,
 
 @router.delete('/{parking_lot_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_parking_lot(parking_lot_id: int,current_user: CurrentActiveUserDependency, db:DatabaseDependency):
-    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_deleted == False)
+    query = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True)
     if not current_user.is_superuser:
         query = query.filter(ParkingLot.owner_id == current_user.id)
     parking_lot = query.first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')
-    parking_lot.is_deleted = True
+    parking_lot.is_active == False
     parking_lot.deleted_at = datetime.now()
     db.commit()
     return

@@ -9,6 +9,6 @@ from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentActiveUserDependency
 
 router = APIRouter(
-    prefix='/api/rating_feedbacks',
+    prefix='/rating_feedbacks',
     tags=['RatingFeedbacks']
 )

@@ -93,3 +93,24 @@ class ActivityLogOut(BaseModel):
     timestamp: datetime
     user_id: Optional[int]
     packing_lot_id: Optional[int]
+
+
+#ParkingSpaceAvailability
+class ParkingSpaceAvailabilityCreate(BaseModel):
+    parking_lot_id: int
+    vehicle_type: str
+    available_spaces: int
+class ParkingSpaceAvailabilityUpdate(BaseModel):
+    vehicle_type: str
+    available_spaces: int
+class ParkingSpaceAvailabilityCreateOut(BaseModel):
+    parking_lot_id: int
+    vehicle_type: str
+    available_spaces: int
+    created_at: datetime
+class ParkingSpaceAvailabilityOut(BaseModel):
+    parking_lot_id: int
+    vehicle_type: str
+    available_spaces: int
+    created_at: datetime
+    updated_at: Optional[datetime]

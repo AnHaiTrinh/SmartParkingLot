@@ -11,13 +11,13 @@ from ..dependencies.oauth2 import CurrentActiveUserDependency
 import base64
 
 router = APIRouter(
-    prefix='/api/vehicles',
+    prefix='/vehicles',
     tags=['Vehicles']
 )
 
 @router.get('/', response_model=List[VehicleOut], status_code=status.HTTP_200_OK)
 def get_all_vehicles(current_user: CurrentActiveUserDependency, db: DatabaseDependency):
-    query = db.query(Vehicle).filter(Vehicle.is_deleted == False)
+    query = db.query(Vehicle).filter(Vehicle.is_active == True)
     if not current_user.is_superuser:
         query = query.filter(Vehicle.owner_id == current_user.id)
     vehicles = query.all()
@@ -45,7 +45,7 @@ def create_vehicle(vehicle: VehicleCreate,current_user: CurrentActiveUserDepende
 
 @router.get('/{vehicle_id}', response_model=VehicleOut, status_code=status.HTTP_200_OK)
 def get_vehicle_id(vehicle_id: int,current_user: CurrentActiveUserDependency, db: DatabaseDependency):
-    query = db.query(Vehicle).filter(Vehicle.id == vehicle_id, Vehicle.is_deleted == False)
+    query = db.query(Vehicle).filter(Vehicle.id == vehicle_id, Vehicle.is_active == True)
     if not current_user.is_superuser:
         query = query.filter(Vehicle.owner_id == current_user.id)
     vehicle = query.first()
@@ -58,7 +58,7 @@ def update_vehicle(vehicle_id: int,
                    vehicle_update: VehicleUpdate,
                    current_user: CurrentActiveUserDependency,
                    db:DatabaseDependency):
-    query = db.query(Vehicle).filter(Vehicle.id == vehicle_id, Vehicle.is_deleted == False)
+    query = db.query(Vehicle).filter(Vehicle.id == vehicle_id, Vehicle.is_active == True)
     if not current_user.is_superuser:
         query = query.filter(Vehicle.owner_id == current_user.id)
     vehicle = query.first()
@@ -73,13 +73,13 @@ def update_vehicle(vehicle_id: int,
 
 @router.delete('/{vehicle_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_vehicle(vehicle_id: int,current_user: CurrentActiveUserDependency, db: DatabaseDependency):
-    query = db.query(Vehicle).filter(Vehicle.id == vehicle_id, Vehicle.is_deleted == False)
+    query = db.query(Vehicle).filter(Vehicle.id == vehicle_id, Vehicle.is_active == True)
     if not current_user.is_superuser:
         query = query.filter(Vehicle.owner_id == current_user.id)
     vehicle = query.first()
     if not vehicle:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Vehicle not found')
-    vehicle.is_deleted = True
+    vehicle.is_active == False
     vehicle.deleted_at = datetime.now()
     db.commit()
     return

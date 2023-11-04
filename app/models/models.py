@@ -15,8 +15,12 @@ class User(Base):
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_active = Column(Boolean, default=True)
-    lock_at = Column(TIMESTAMP, server_default=text("NULL"))
+    deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
 
+    parking_lots = relationship("ParkingLot", back_populates="owner")
+    vehicles = relationship("Vehicle", back_populates="owner")
+    ratings_feedbacks = relationship("RatingFeedback", back_populates="user")
+    activity_logs = relationship("ActivityLog", back_populates="user")
 class ParkingLot(Base):
     __tablename__ = "parking_lots"
 
@@ -24,37 +28,42 @@ class ParkingLot(Base):
     name = Column(String, unique=True, index=True)
     longitude  = Column(Float)
     latitude  = Column(Float)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
-    is_deleted = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
 
+    owner = relationship("User", back_populates="parking_lots")
+    parking_space_availabilities = relationship("ParkingSpaceAvailability", back_populates="parking_lot")
+    ratings_feedbacks = relationship("RatingFeedback", back_populates="parking_lot")
+    activity_logs = relationship("ActivityLog", back_populates="user")
 class Vehicle(Base):
     __tablename__ = "vehicles"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     license_plate = Column(String, unique=True, index=True)
     vehicle_type = Column(String)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
-    is_deleted = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
 
+    owner = relationship("User", back_populates="vehicles")
 class ParkingSpaceAvailability(Base):
     __tablename__ = "parking_space_availability"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    parking_lot_id = Column(Integer, ForeignKey("parking_lots.id"))
+    parking_lot_id = Column(Integer, ForeignKey("parking_lots.id", ondelete="CASCADE"))
     vehicle_type = Column(String)
     available_spaces = Column(Integer, default=0)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
-    is_deleted = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
 
-
+    parking_lot = relationship("ParkingLot", back_populates="parking_space_availabilities")
 class RatingFeedback(Base):
     __tablename__ = "ratings_feedbacks"
 
@@ -65,9 +74,11 @@ class RatingFeedback(Base):
     feedback = Column(String)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
-    is_deleted = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
 
+    user = relationship("User", back_populates="ratings_feedbacks")
+    parking_lot = relationship("ParkingLot", back_populates="ratings_feedbacks")
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
@@ -76,8 +87,10 @@ class ActivityLog(Base):
     license_plate = Column(String)
     note = Column(String)
     timestamp = Column(TIMESTAMP, server_default=text("now()"))
-    owner_id = Column(Integer, ForeignKey("users.id"))
     user_id = Column(Integer, ForeignKey("users.id"))
     parking_lot_id = Column(Integer, ForeignKey("parking_lots.id"))
-    is_deleted = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=True)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
+
+    user = relationship("User", back_populates="activity_logs")
+    parking_lot = relationship("ParkingLot", back_populates="activity_logs")

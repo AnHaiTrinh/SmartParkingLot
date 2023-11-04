@@ -43,11 +43,11 @@ def get_rating_feedback_id(rating_feedback_id: int, db: DatabaseDependency):
 
 @router.put('/{rating_feedback_id}', response_model=RatingFeedbackOut, status_code=status.HTTP_200_OK)
 def update_rating_feedback(rating_feedback_id: int, update_rating_feedback: RatingFeedbackUpdate, current_active_user: CurrentActiveUserDependency, db: DatabaseDependency):
+    if not current_active_user.is_superuser and not rating_feedback.user_id == current_active_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     rating_feedback = db.query(RatingFeedback).filter(RatingFeedback.id == rating_feedback_id, RatingFeedback.is_active == True).first()
     if not rating_feedback:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='rating feedback not found')
-    if not current_active_user.is_superuser and not rating_feedback.user_id == current_active_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     rating_feedback.rating = update_rating_feedback.rating
     rating_feedback.feedback = update_rating_feedback.feedback
     rating_feedback.updated_at = datetime.now()
@@ -57,11 +57,11 @@ def update_rating_feedback(rating_feedback_id: int, update_rating_feedback: Rati
 
 @router.delete('/{rating_feedback_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_rating_feedback(rating_feedback_id: int, current_active_user: CurrentActiveUserDependency, db: DatabaseDependency):
+    if not current_active_user.is_superuser and not rating_feedback.user_id == current_active_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     rating_feedback = db.query(RatingFeedback).filter(RatingFeedback.id == rating_feedback_id, RatingFeedback.is_active == True).first()
     if not rating_feedback:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='rating feedback not found')
-    if not current_active_user.is_superuser and not rating_feedback.user_id == current_active_user.id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     rating_feedback.rating = update_rating_feedback.rating
     rating_feedback.feedback = update_rating_feedback.feedback
     rating_feedback.is_active = False

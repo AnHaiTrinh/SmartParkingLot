@@ -41,14 +41,12 @@ class ParkingLotCreateOut(BaseModel):
     name: str
     longitude: float
     latitude: float
-    owner_id: int
     created_at: datetime
 class ParkingLotOut(BaseModel):
     id: int
     name: str
     longitude: float
     latitude: float
-    owner_id: int
     created_at: datetime
     updated_at: Optional[datetime]
 
@@ -81,18 +79,16 @@ class VehicleOut(BaseModel):
 
 #ActivityLog
 class ActivityLogCreate(BaseModel):
+    parking_lot_id: int
     activity_type: str
     license_plate: str
-    note: str
-    user_id: Optional[int]
-    packing_lot_id: Optional[int]
 class ActivityLogOut(BaseModel):
+    id: int
+    parking_lot_id: int
     activity_type: str
     license_plate: str
-    note: str
     timestamp: datetime
-    user_id: Optional[int]
-    packing_lot_id: Optional[int]
+
 
 
 #ParkingSpaceAvailability
@@ -101,16 +97,39 @@ class ParkingSpaceAvailabilityCreate(BaseModel):
     vehicle_type: str
     available_spaces: int
 class ParkingSpaceAvailabilityUpdate(BaseModel):
-    vehicle_type: str
     available_spaces: int
 class ParkingSpaceAvailabilityCreateOut(BaseModel):
+    id: int
     parking_lot_id: int
     vehicle_type: str
     available_spaces: int
     created_at: datetime
 class ParkingSpaceAvailabilityOut(BaseModel):
+    id: int
     parking_lot_id: int
     vehicle_type: str
     available_spaces: int
+    created_at: datetime
+    updated_at: Optional[datetime]
+
+
+
+#RatingFeedback
+class RatingFeedbackCreate(BaseModel):
+    parking_lot_id: int
+    rating: int
+    feedback: str
+class RatingFeedbackUpdate(BaseModel):
+    rating: int
+    feedback: str
+class RatingFeedbackCreateOut(BaseModel):
+    id: int
+    rating: int
+    feedback: str
+    created_at: datetime
+class RatingFeedbackOut(BaseModel):
+    id: int
+    rating: int
+    feedback: str
     created_at: datetime
     updated_at: Optional[datetime]

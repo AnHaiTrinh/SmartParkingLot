@@ -8,7 +8,7 @@ from .db_connection import DatabaseDependency
 from ..models.models import User
 from ..utils.jwt import verify_jwt_token
 
-auth_scheme = OAuth2PasswordBearer(tokenUrl='/api/login')
+auth_scheme = OAuth2PasswordBearer(tokenUrl='/login')
 
 
 def get_current_user(db: DatabaseDependency, token: str = Depends(auth_scheme)):

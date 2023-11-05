@@ -41,7 +41,7 @@ def create_vehicle(vehicle: VehicleCreate,current_active_user: CurrentActiveUser
         db.refresh(new_vehicle)
         return new_vehicle
     except IntegrityError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='vehicle already exists')
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Vehicle already exists')
 
 @router.get('/{vehicle_id}', response_model=VehicleOut, status_code=status.HTTP_200_OK)
 def get_vehicle_id(vehicle_id: int,current_active_user: CurrentActiveUserDependency, db: DatabaseDependency):

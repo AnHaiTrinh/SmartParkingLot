@@ -17,7 +17,7 @@ router = APIRouter(
 def get_parking_lot_ratings_feedbacks(parking_lot_id: int, db: DatabaseDependency):
     parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True).first()
     if not parking_lot:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="parking lot no found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parking lot no found")
     query = db.query(RatingFeedback).join(ParkingLot, ParkingLot.id == parking_lot_id)
     parking_lot_ratings_feedbacks = query.all()
     return parking_lot_ratings_feedbacks
@@ -27,7 +27,7 @@ def create_ratings_feedbacks(rating_feedback: RatingFeedbackCreate, current_acti
     new_rating_feedback = RatingFeedback(**rating_feedback.model_dump())
     parking_lot = db.query(ParkingLot).filter(ParkingLot.id == new_rating_feedback.parking_lot_id, ParkingLot.is_active == True).first()
     if not parking_lot:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="parking lot no found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parking lot no found")
     new_rating_feedback.user_id = current_active_user.id
     db.add(new_rating_feedback)
     db.commit()
@@ -38,7 +38,7 @@ def create_ratings_feedbacks(rating_feedback: RatingFeedbackCreate, current_acti
 def get_rating_feedback_id(rating_feedback_id: int, db: DatabaseDependency):
     rating_feedback = db.query(RatingFeedback).filter(RatingFeedback.id == rating_feedback_id, RatingFeedback.is_active == True).first()
     if not rating_feedback:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='rating feedback not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Rating feedback not found')
     return rating_feedback
 
 @router.put('/{rating_feedback_id}', response_model=RatingFeedbackOut, status_code=status.HTTP_200_OK)
@@ -47,7 +47,7 @@ def update_rating_feedback(rating_feedback_id: int, update_rating_feedback: Rati
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     rating_feedback = db.query(RatingFeedback).filter(RatingFeedback.id == rating_feedback_id, RatingFeedback.is_active == True).first()
     if not rating_feedback:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='rating feedback not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Rating feedback not found')
     rating_feedback.rating = update_rating_feedback.rating
     rating_feedback.feedback = update_rating_feedback.feedback
     rating_feedback.updated_at = datetime.now()
@@ -61,7 +61,7 @@ def delete_rating_feedback(rating_feedback_id: int, current_active_user: Current
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     rating_feedback = db.query(RatingFeedback).filter(RatingFeedback.id == rating_feedback_id, RatingFeedback.is_active == True).first()
     if not rating_feedback:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='rating feedback not found')
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Rating feedback not found')
     rating_feedback.rating = update_rating_feedback.rating
     rating_feedback.feedback = update_rating_feedback.feedback
     rating_feedback.is_active = False

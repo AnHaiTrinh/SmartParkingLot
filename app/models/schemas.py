@@ -1,3 +1,6 @@
+from enum import Enum
+from typing import Union
+
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -24,3 +27,13 @@ class UserUpdate(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class TokenType(str, Enum):
+    access_token = 'access'
+    refresh_token = 'refresh'
+
+
+class TokenData(BaseModel):
+    token_type: TokenType
+    token: str

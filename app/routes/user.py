@@ -2,6 +2,8 @@ from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
 
 from ..models.schemas import UserCreate, UserCreateOut, UserUpdate, UserOut
 from ..models.models import User
@@ -22,26 +24,28 @@ def create_user(user: UserCreate, db: DatabaseDependency):
 
     try:
         new_user = User(**user.model_dump())
-        
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
         return new_user
     except IntegrityError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Username already exists')
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Internal server error')
 
 
 @router.get('/me', response_model=UserOut, status_code=status.HTTP_200_OK)
 def get_current_user(current_active_user: CurrentActiveUserDependency):
     return current_active_user
 
-#admin
-@router.get('/', response_model=List[UserOut], status_code=status.HTTP_200_OK)
+
+# admin
+@router.get('/', response_model=Page[UserOut], status_code=status.HTTP_200_OK)
 def get_all_users(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
     if not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
-    users = db.query(User).all()
-    return users
+    return paginate(db.query(User))
 
 
 @router.get('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
@@ -52,6 +56,7 @@ def get_user_by_id(user_id: int, db: DatabaseDependency, current_active_user: Cu
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     return user
+
 
 @router.put('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
 def update_user(user_id: int,

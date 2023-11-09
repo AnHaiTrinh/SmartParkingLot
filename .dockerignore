@@ -11,3 +11,4 @@ docker-compose.yml
 
 # Ignore mount volume
 .db_data
+.redis_data

@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, JSON
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.orm import relationship
 from app.configs.db_configs import Base
+
 
 class User(Base):
     __tablename__ = "users"
@@ -11,7 +12,6 @@ class User(Base):
     username = Column(String, unique=True, index=True)
     password = Column(String)
     is_superuser = Column(Boolean, default=False)
-    refresh_token = Column(String, default=None, nullable=True)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_active = Column(Boolean, default=True)
@@ -20,55 +20,45 @@ class User(Base):
     vehicles = relationship("Vehicle", back_populates="owner")
     ratings_feedbacks = relationship("RatingFeedback", back_populates="user")
     activity_logs = relationship("ActivityLog", back_populates="user")
+
+
 class ParkingLot(Base):
     __tablename__ = "parking_lots"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     name = Column(String, unique=True, index=True)
-    longitude  = Column(Float)
-    latitude  = Column(Float)
+    longitude = Column(Float)
+    latitude = Column(Float)
+    available_spaces = Column(JSON)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_active = Column(Boolean, default=True)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
 
-    parking_space_availabilities = relationship("ParkingSpaceAvailability", back_populates="parking_lot")
     ratings_feedbacks = relationship("RatingFeedback", back_populates="parking_lot")
     activity_logs = relationship("ActivityLog", back_populates="parking_lot")
+
+
 class Vehicle(Base):
     __tablename__ = "vehicles"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     license_plate = Column(String, unique=True, index=True)
-    vehicle_type = Column(String)
+    vehicle_type = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     created_at = Column(TIMESTAMP, server_default=text("now()"))
-    updated_at = Column(TIMESTAMP, server_default=text("NULL"))
-    is_active = Column(Boolean, default=True)
-    deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
 
     owner = relationship("User", back_populates="vehicles")
-class ParkingSpaceAvailability(Base):
-    __tablename__ = "parking_space_availabilities"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    parking_lot_id = Column(Integer, ForeignKey("parking_lots.id", ondelete="CASCADE"))
-    vehicle_type = Column(String)
-    available_spaces = Column(Integer, default=0)
-    created_at = Column(TIMESTAMP, server_default=text("now()"))
-    updated_at = Column(TIMESTAMP, server_default=text("NULL"))
-    is_active = Column(Boolean, default=True)
-    deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
 
-    parking_lot = relationship("ParkingLot", back_populates="parking_space_availabilities")
 class RatingFeedback(Base):
-    __tablename__ = "ratings_feedbacks"
+    __tablename__ = "rating_feedbacks"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    parking_lot_id = Column(Integer, ForeignKey("parking_lots.id"))
-    rating = Column(Integer, default=0)
-    feedback = Column(String)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
+    parking_lot_id = Column(Integer, ForeignKey("parking_lots.id", ondelete="CASCADE"))
+    rating = Column(Integer, nullable=False)
+    feedback = Column(String, nullable=True, server_default=text("NULL"))
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_active = Column(Boolean, default=True)
@@ -76,13 +66,15 @@ class RatingFeedback(Base):
 
     user = relationship("User", back_populates="ratings_feedbacks")
     parking_lot = relationship("ParkingLot", back_populates="ratings_feedbacks")
+
+
 class ActivityLog(Base):
     __tablename__ = "activity_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    activity_type = Column(String)
-    license_plate = Column(String)
-    timestamp = Column(TIMESTAMP, server_default=text("now()"))
+    activity_type = Column(String, nullable=False)
+    license_plate = Column(String, nullable=False)
+    timestamp = Column(TIMESTAMP, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     parking_lot_id = Column(Integer, ForeignKey("parking_lots.id", ondelete="CASCADE"))
 

@@ -20,6 +20,11 @@ def get_all_parking_lots(db: DatabaseDependency):
     return paginate(db.query(ParkingLot).filter(ParkingLot.is_active == True))
 
 
+@router.get('/{name}', response_model=Page[ParkingLotOut], status_code=status.HTTP_200_OK)
+def get_parking_lot_by_name(db: DatabaseDependency, name: str):
+    return paginate(db.query(ParkingLot).filter(ParkingLot.name.ilike(f'{name.lower()}%')))
+
+
 @router.post('/', response_model=ParkingLotCreateOut, status_code=status.HTTP_201_CREATED)
 def create_parking_lot(current_active_user: CurrentActiveUserDependency, parking_lot: ParkingLotCreate,
                        db: DatabaseDependency):
@@ -36,7 +41,7 @@ def create_parking_lot(current_active_user: CurrentActiveUserDependency, parking
 
 
 @router.get('/{parking_lot_id}', response_model=ParkingLotOut, status_code=status.HTTP_200_OK)
-def get_parking_lot_id(parking_lot_id: int, db: DatabaseDependency):
+def get_parking_lot_by_id(parking_lot_id: int, db: DatabaseDependency):
     parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True).first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')

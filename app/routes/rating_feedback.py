@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Query
 from datetime import datetime
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
@@ -16,13 +16,19 @@ router = APIRouter(
 
 
 @router.get('/', response_model=Page[RatingFeedbackOut], status_code=status.HTTP_200_OK)
-def get_parking_lot_ratings_feedbacks(parking_lot_id: int, db: DatabaseDependency):
+def get_parking_lot_ratings_feedbacks(parking_lot_id: int,
+                                      db: DatabaseDependency,
+                                      sort: str = Query(default='desc', regex='^(desc|asc)$'),
+                                      order: str = Query(default='creation', regex='^(creation|rating)$')):
     parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True).first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parking lot no found")
+    sort_condition = func.coalesce(RatingFeedback.updated_at, RatingFeedback.created_at) if order == 'creation' \
+        else RatingFeedback.rating
+    order_by = sort_condition.desc() if sort == 'desc' else sort_condition.asc()
     return paginate(db.query(RatingFeedback)
                     .filter(RatingFeedback.parking_lot_id == parking_lot_id)
-                    .order_by(func.coalesce(RatingFeedback.created_at, RatingFeedback.created_at).desc()))
+                    .order_by(order_by))
 
 
 @router.post('/', response_model=RatingFeedbackCreateOut, status_code=status.HTTP_201_CREATED)

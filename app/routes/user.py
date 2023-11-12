@@ -48,6 +48,13 @@ def get_all_users(db: DatabaseDependency, current_active_user: CurrentActiveUser
     return paginate(db.query(User))
 
 
+@router.get('/{username}', response_model=Page[UserOut], status_code=status.HTTP_200_OK)
+def get_users_by_username(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency, username: str):
+    if not current_active_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
+    return paginate(db.query(User).filter(User.username.ilike(f'{username.lower()}%')))
+
+
 @router.get('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
 def get_user_by_id(user_id: int, db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
     if current_active_user.id != user_id and not current_active_user.is_superuser:

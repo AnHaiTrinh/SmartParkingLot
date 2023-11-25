@@ -56,6 +56,10 @@ def get_vehicle_id(vehicle_id: int, current_active_user: CurrentActiveUserDepend
 @router.delete('/{vehicle_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_vehicle(vehicle_id: int, current_active_user: CurrentActiveUserDependency, db: DatabaseDependency):
     vehicle = db.query(Vehicle).filter(Vehicle.id == vehicle_id).first()
-    if (not vehicle) or vehicle.owner_id != current_active_user.id:
+    if not vehicle:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Vehicle not found')
-    return vehicle
+    if vehicle.owner_id != current_active_user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
+    db.delete(vehicle)
+    db.commit()
+    return

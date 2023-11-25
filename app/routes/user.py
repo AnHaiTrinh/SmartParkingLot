@@ -83,7 +83,7 @@ def update_user(user_id: int,
 
 @router.delete('/{user_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_user(user_id: int, db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
-    if current_active_user.id != user_id or not current_active_user.is_superuser:
+    if current_active_user.id != user_id and not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     user = db.query(User).filter(User.id == user_id, User.is_active == True).first()
     if not user:

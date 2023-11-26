@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, JSON
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
+from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import relationship
 from app.configs.db_configs import Base
 
@@ -29,7 +30,7 @@ class ParkingLot(Base):
     name = Column(String, unique=True, index=True)
     longitude = Column(Float)
     latitude = Column(Float)
-    available_spaces = Column(JSON)
+    available_spaces = Column(MutableDict.as_mutable(JSON), nullable=True)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_active = Column(Boolean, default=True)

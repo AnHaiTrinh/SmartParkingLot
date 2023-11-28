@@ -61,7 +61,6 @@ def update_parking_lot(parking_lot_id: int,
     try:
         parking_lot_update_dict = parking_lot_update.model_dump(exclude_unset=True)
         for key, value in parking_lot_update_dict.items():
-            print(key, value)
             if type(value) is dict:
                 current_value = getattr(parking_lot, key)
                 for sub_key, sub_value in value.items():

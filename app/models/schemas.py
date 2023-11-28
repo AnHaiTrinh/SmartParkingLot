@@ -110,17 +110,19 @@ class VehicleCreate(BaseVehicle):
 
 
 class VehicleCreateOut(BaseVehicle):
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     created_at: datetime
 
 
 class VehicleOut(BaseVehicle):
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     created_at: datetime
+
+
+class VehicleAdminOut(VehicleOut):
+    model_config = ConfigDict(from_attributes=True)
+
+    owner: Owner
 
 
 # ActivityLog

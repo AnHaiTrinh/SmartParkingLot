@@ -1,7 +1,7 @@
 import os
 from typing import Annotated, Union
 
-from fastapi import APIRouter, HTTPException, Depends, status, Response, Cookie, Header
+from fastapi import APIRouter, HTTPException, Depends, status, Response, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
 
 from ..models.schemas import Token, TokenData

@@ -23,6 +23,7 @@ services:
       - backend
     volumes:
       - .\.redis_data:/data
+    restart: always
 
   db:
     image: postgres:16.0-alpine

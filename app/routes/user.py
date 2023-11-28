@@ -1,8 +1,11 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.exc import IntegrityError
+from datetime import datetime
+from fastapi_pagination import Page
+from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..models.schemas import UserCreate, UserOut, UserUpdate
+from ..models.schemas import UserCreate, UserCreateOut, UserUpdate, UserOut
 from ..models.models import User
 from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentActiveUserDependency
@@ -14,7 +17,7 @@ router = APIRouter(
 )
 
 
-@router.post('/', response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post('/', response_model=UserCreateOut, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: DatabaseDependency):
     hashed_password = hash_password(user.password)
     user.password = hashed_password
@@ -27,19 +30,29 @@ def create_user(user: UserCreate, db: DatabaseDependency):
         return new_user
     except IntegrityError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Username already exists')
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail='Internal server error')
 
 
 @router.get('/me', response_model=UserOut, status_code=status.HTTP_200_OK)
-def get_current_user(current_user: CurrentActiveUserDependency):
-    return current_user
+def get_current_user(current_active_user: CurrentActiveUserDependency):
+    return current_active_user
 
 
-@router.get('/', response_model=List[UserOut], status_code=status.HTTP_200_OK)
-def get_all_users(db: DatabaseDependency, current_user: CurrentActiveUserDependency):
-    if not current_user.is_superuser:
+# admin
+@router.get('/', response_model=Page[UserOut], status_code=status.HTTP_200_OK)
+def get_all_users(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
+    if not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
-    users = db.query(User).all()
-    return users
+    return paginate(db.query(User))
+
+
+@router.get('/{username}', response_model=Page[UserOut], status_code=status.HTTP_200_OK)
+def get_users_by_username(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency, username: str):
+    if not current_active_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
+    return paginate(db.query(User).filter(User.username.ilike(f'{username.lower()}%')))
 
 
 @router.get('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
@@ -72,9 +85,10 @@ def update_user(user_id: int,
 def delete_user(user_id: int, db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
     if current_active_user.id != user_id and not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
-    user = db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id, User.is_active == True).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     user.is_active = False
+    user.deleted_at = datetime.now()
     db.commit()
     return

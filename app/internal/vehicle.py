@@ -9,10 +9,10 @@ from ..dependencies.oauth2 import CurrentActiveUserDependency
 from ..models.models import Vehicle
 from ..models.schemas import VehicleAdminOut
 
-router = APIRouter()
+router = APIRouter(prefix='/vehicles')
 
 
-@router.get('/vehicles', response_model=Page[VehicleAdminOut], status_code=status.HTTP_200_OK)
+@router.get('/', response_model=Page[VehicleAdminOut], status_code=status.HTTP_200_OK)
 def get_vehicles(
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,
@@ -30,3 +30,21 @@ def get_vehicles(
     if not results.items:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     return results
+
+
+@router.put('/track/{vehicle_id}', response_model=VehicleAdminOut, status_code=status.HTTP_200_OK)
+def track_vehicles(
+        current_active_user: CurrentActiveUserDependency,
+        db: DatabaseDependency,
+        vehicle_id: int,
+        track: bool
+):
+    if not current_active_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='User does not have admin privileges')
+    vehicle = db.query(Vehicle).filter(Vehicle.id == vehicle_id).first()
+    if vehicle is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Vehicle not found')
+    vehicle.is_tracked = track
+    db.commit()
+    db.refresh(vehicle)
+    return vehicle

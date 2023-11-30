@@ -9,10 +9,10 @@ from ..dependencies.oauth2 import CurrentActiveUserDependency
 from ..models.schemas import ParkingLotAdminOut
 from ..models.models import ParkingLot
 
-router = APIRouter()
+router = APIRouter(prefix='/parking_lots')
 
 
-@router.get('/parking_lots', response_model=Page[ParkingLotAdminOut], status_code=status.HTTP_200_OK)
+@router.get('/', response_model=Page[ParkingLotAdminOut], status_code=status.HTTP_200_OK)
 def get_all_parking_lots(
         db: DatabaseDependency,
         current_active_user: CurrentActiveUserDependency,

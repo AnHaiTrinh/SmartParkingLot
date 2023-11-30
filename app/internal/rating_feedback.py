@@ -10,10 +10,10 @@ from ..dependencies.oauth2 import CurrentActiveUserDependency
 from ..models.models import RatingFeedback
 from ..models.schemas import RatingFeedbackAdminOut
 
-router = APIRouter()
+router = APIRouter(prefix='/ratings_feedbacks')
 
 
-@router.get('/ratings_feedbacks', response_model=Page[RatingFeedbackAdminOut], status_code=status.HTTP_200_OK)
+@router.get('/', response_model=Page[RatingFeedbackAdminOut], status_code=status.HTTP_200_OK)
 def get_rating_feedbacks(
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,

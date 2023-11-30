@@ -10,10 +10,10 @@ from ..dependencies.oauth2 import CurrentActiveUserDependency
 from ..models.models import ActivityLog
 from ..models.schemas import ActivityLogOut
 
-router = APIRouter()
+router = APIRouter(prefix='/activity_logs')
 
 
-@router.get('/activity_logs', response_model=Page[ActivityLogOut], status_code=status.HTTP_200_OK)
+@router.get('/', response_model=Page[ActivityLogOut], status_code=status.HTTP_200_OK)
 def get_activity_logs(
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,

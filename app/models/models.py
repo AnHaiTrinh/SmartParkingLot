@@ -46,6 +46,7 @@ class Vehicle(Base):
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     license_plate = Column(String, unique=True, index=True)
     vehicle_type = Column(String, nullable=False)
+    is_tracked = Column(Boolean, default=False)
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"))
     created_at = Column(TIMESTAMP, server_default=text("now()"))
 

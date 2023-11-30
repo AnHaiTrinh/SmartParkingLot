@@ -128,6 +128,7 @@ class VehicleOut(BaseVehicle):
 class VehicleAdminOut(VehicleOut):
     model_config = ConfigDict(from_attributes=True)
 
+    is_tracked: bool
     owner: Owner
 
 

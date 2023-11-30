@@ -8,22 +8,25 @@ from sqlalchemy import func
 from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentActiveUserDependency
 from ..models.models import RatingFeedback
-from ..models.schemas import RatingFeedbackOut
+from ..models.schemas import RatingFeedbackAdminOut
 
 router = APIRouter()
 
 
-@router.get('/ratings_feedbacks', response_model=Page[RatingFeedbackOut], status_code=status.HTTP_200_OK)
+@router.get('/ratings_feedbacks', response_model=Page[RatingFeedbackAdminOut], status_code=status.HTTP_200_OK)
 def get_rating_feedbacks(
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,
+        show_deleted: Optional[bool] = Query(default=False),
         sort: str = Query(default='desc', regex='^(desc|asc)$'),
         order: str = Query(default='creation', regex='^(creation|rating)$'),
-        user_id: Optional[int] = Query(default=None)
+        user_id: Optional[int] = Query(default=None),
 ):
     if not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='User does not have admin privileges')
     query = db.query(RatingFeedback)
+    if not show_deleted:
+        query = query.filter(RatingFeedback.is_active == True)
     if user_id is not None:
         query = query.filter(RatingFeedback.user_id == user_id)
     sort_condition = func.coalesce(RatingFeedback.updated_at, RatingFeedback.created_at) if order == 'creation' \

@@ -27,6 +27,7 @@ class UserOut(BaseUser):
     is_superuser: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
 
 
 class UserUpdate(BaseModel):
@@ -89,6 +90,11 @@ class ParkingLotOut(BaseParkingLot):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+
+
+class ParkingLotAdminOut(ParkingLotOut):
+    is_active: bool
+    deleted_at: Optional[datetime] = None
 
 
 # Vehicle
@@ -183,3 +189,8 @@ class RatingFeedbackOut(BaseRatingFeedback):
     parking_lot: ParkingLot
     created_at: datetime
     updated_at: Optional[datetime]
+
+
+class RatingFeedbackAdminOut(RatingFeedbackOut):
+    is_active: bool
+    deleted_at: Optional[datetime] = None

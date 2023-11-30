@@ -1,5 +1,5 @@
 from typing import List
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Query
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from fastapi_pagination import Page
@@ -42,17 +42,31 @@ def get_current_user(current_active_user: CurrentActiveUserDependency):
 
 # admin
 @router.get('/', response_model=Page[UserOut], status_code=status.HTTP_200_OK)
-def get_all_users(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
+def get_all_users(db: DatabaseDependency,
+                  current_active_user: CurrentActiveUserDependency,
+                  show_deleted: bool = Query(default=False)):
     if not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
-    return paginate(db.query(User))
+    query = db.query(User)
+    if not show_deleted:
+        query = query.filter(User.is_active == True)
+    return paginate(query)
 
 
 @router.get('/{username}', response_model=Page[UserOut], status_code=status.HTTP_200_OK)
-def get_users_by_username(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency, username: str):
+def get_users_by_username(db: DatabaseDependency,
+                          current_active_user: CurrentActiveUserDependency,
+                          username: str,
+                          show_deleted: bool = Query(default=False)):
     if not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
-    return paginate(db.query(User).filter(User.username.ilike(f'{username.lower()}%')))
+    query = db.query(User).filter(User.username.ilike(f'{username.lower()}%'))
+    if not show_deleted:
+        query = query.filter(User.is_active == True)
+    results = paginate(query)
+    if not results.items:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+    return results
 
 
 @router.get('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)

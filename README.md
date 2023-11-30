@@ -34,7 +34,7 @@ Check by running:
 
 ```bash
 docker -v
-docker compose -v
+docker compose version
 ```
 If not installed, follow the instructions in the [Docker website](https://docs.docker.com/get-docker/).
 
@@ -77,3 +77,9 @@ Run the main app:
 uvicorn app.main:app
 ```
 Once the server is up and running, you can access the API at http://localhost:8000.
+
+## Development
+To automatically update the app container when changes are made, run:
+```
+docker compose watch
+```

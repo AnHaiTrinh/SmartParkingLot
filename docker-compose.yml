@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3"
 services:
   app:
     build: .
@@ -15,6 +15,14 @@ services:
       redis:
         condition: service_started
     restart: always
+    develop:
+      watch:
+        - action: sync
+          path: ./app
+          target: /app/app
+        - action: rebuild
+          path: ./requirements.txt
+          target: /app/requirements.txt
 
   redis:
     image: redis:alpine

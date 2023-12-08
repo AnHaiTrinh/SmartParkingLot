@@ -90,6 +90,7 @@ def update_user(user_id: int,
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     user.is_superuser = user_update.is_superuser
+    user.updated_at = datetime.now()
     db.commit()
     db.refresh(user)
     return user

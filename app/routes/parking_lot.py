@@ -17,7 +17,7 @@ router = APIRouter(
 
 @router.get('/', response_model=Page[ParkingLotOut], status_code=status.HTTP_200_OK)
 def get_all_parking_lots(db: DatabaseDependency):
-    return paginate(db.filter(ParkingLot.is_active == True))
+    return paginate(db.query(ParkingLot).filter(ParkingLot.is_active == True))
 
 
 @router.get('/{name}', response_model=Page[ParkingLotOut], status_code=status.HTTP_200_OK)

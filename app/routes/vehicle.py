@@ -22,7 +22,7 @@ def get_all_vehicles(current_active_user: CurrentActiveUserDependency, db: Datab
     return paginate(db.query(Vehicle).filter(Vehicle.owner_id == current_active_user.id))
 
 
-@router.get('/{license_plate}', response_model=Page[VehicleOut], status_code=status.HTTP_200_OK)
+@router.get('/search/{license_plate}', response_model=Page[VehicleOut], status_code=status.HTTP_200_OK)
 def get_vehicles_by_name(current_active_user: CurrentActiveUserDependency, db: DatabaseDependency, license_plate: str):
     return paginate(db.query(Vehicle).filter(Vehicle.owner_id == current_active_user.id,
                                              Vehicle.license_plate.ilike(f'{license_plate.lower()}%')))

@@ -148,6 +148,13 @@ class ActivityLogOut(BaseModel):
     activity_type: str
     license_plate: str
 
+# validate
+class ValidateActivityLog(BaseModel):
+    parking_lot_id: int
+    license_plate: str
+    vehicle_type: str
+    activity_type: str
+    created_at: datetime
 
 # Rating Feedback
 class BaseRatingFeedback(BaseModel):

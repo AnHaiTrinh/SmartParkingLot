@@ -27,6 +27,7 @@ class UserOut(BaseUser):
     is_superuser: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
 
 
 class UserUpdate(BaseModel):
@@ -91,6 +92,11 @@ class ParkingLotOut(BaseParkingLot):
     updated_at: Optional[datetime] = None
 
 
+class ParkingLotAdminOut(ParkingLotOut):
+    is_active: bool
+    deleted_at: Optional[datetime] = None
+
+
 # Vehicle
 class Owner(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -110,17 +116,20 @@ class VehicleCreate(BaseVehicle):
 
 
 class VehicleCreateOut(BaseVehicle):
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     created_at: datetime
 
 
 class VehicleOut(BaseVehicle):
-    model_config = ConfigDict(from_attributes=True)
-
     id: int
     created_at: datetime
+
+
+class VehicleAdminOut(VehicleOut):
+    model_config = ConfigDict(from_attributes=True)
+
+    is_tracked: bool
+    owner: Owner
 
 
 # ActivityLog
@@ -181,3 +190,8 @@ class RatingFeedbackOut(BaseRatingFeedback):
     parking_lot: ParkingLot
     created_at: datetime
     updated_at: Optional[datetime]
+
+
+class RatingFeedbackAdminOut(RatingFeedbackOut):
+    is_active: bool
+    deleted_at: Optional[datetime] = None

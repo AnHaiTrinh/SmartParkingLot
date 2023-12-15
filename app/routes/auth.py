@@ -26,13 +26,18 @@ def login(response: Response, db: DatabaseDependency,
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not authorized')
 
     access_token = create_jwt_token(
-        data={'user_id': user.id},
+        data={
+            'user_id': user.id,
+            'is_superuser': user.is_superuser
+        },
         secret_key=os.getenv('JWT_ACCESS_SECRET_KEY'),
         expiry={'minutes': int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))}
     )
 
     refresh_token = create_jwt_token(
-        data={'user_id': user.id},
+        data={
+            'user_id': user.id
+        },
         secret_key=os.getenv('JWT_REFRESH_SECRET_KEY'),
         expiry={'days': int(os.getenv('REFRESH_TOKEN_EXPIRE_DAYS'))}
     )
@@ -48,6 +53,7 @@ def login(response: Response, db: DatabaseDependency,
 
 @router.get("/refresh", response_model=Token)
 def refresh_access_token(redis_client: RedisDependency,
+                         db: DatabaseDependency,
                          jwt: Annotated[Union[str, None], Cookie()] = None):
     if jwt is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Refresh token not found')
@@ -56,12 +62,15 @@ def refresh_access_token(redis_client: RedisDependency,
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not authorized')
     try:
         user_id = int(user_id.decode('utf8'))
-        decoded_user_id = verify_jwt_token(jwt, secret_key=os.getenv('JWT_REFRESH_SECRET_KEY'),
-                                           redis_client=redis_client)
-        if decoded_user_id != user_id:
+        user = verify_jwt_token(jwt, secret_key=os.getenv('JWT_REFRESH_SECRET_KEY'), db=db, redis_client=redis_client)
+        if user.id != user_id:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Could not validate credentials')
+        user = db.query(User).filter(User.id == user_id).first()
         access_token = create_jwt_token(
-            data={'user_id': user_id},
+            data={
+                'user_id': user_id,
+                'is_superuser': user.is_superuser
+            },
             secret_key=os.getenv('JWT_ACCESS_SECRET_KEY'),
             expiry={'minutes': int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))}
         )

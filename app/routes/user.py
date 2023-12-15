@@ -1,5 +1,5 @@
-from typing import List
-from fastapi import APIRouter, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, HTTPException, status, Query
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from fastapi_pagination import Page
@@ -42,17 +42,20 @@ def get_current_user(current_active_user: CurrentActiveUserDependency):
 
 # admin
 @router.get('/', response_model=Page[UserOut], status_code=status.HTTP_200_OK)
-def get_all_users(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):
+def get_all_users(
+        db: DatabaseDependency,
+        current_active_user: CurrentActiveUserDependency,
+        show_deleted: bool = Query(default=False),
+        username: Optional[str] = Query(default=None)
+):
     if not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
-    return paginate(db.query(User))
-
-
-@router.get('/{username}', response_model=Page[UserOut], status_code=status.HTTP_200_OK)
-def get_users_by_username(db: DatabaseDependency, current_active_user: CurrentActiveUserDependency, username: str):
-    if not current_active_user.is_superuser:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
-    return paginate(db.query(User).filter(User.username.ilike(f'{username.lower()}%')))
+    query = db.query(User)
+    if not show_deleted:
+        query = query.filter(User.is_active == True)
+    if username is not None:
+        query = query.filter(User.username.ilike(f'{username.lower()}%'))
+    return paginate(query)
 
 
 @router.get('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
@@ -76,6 +79,7 @@ def update_user(user_id: int,
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     user.is_superuser = user_update.is_superuser
+    user.updated_at = datetime.now()
     db.commit()
     db.refresh(user)
     return user

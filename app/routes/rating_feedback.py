@@ -16,10 +16,12 @@ router = APIRouter(
 
 
 @router.get('/', response_model=Page[RatingFeedbackOut], status_code=status.HTTP_200_OK)
-def get_parking_lot_ratings_feedbacks(parking_lot_id: int,
-                                      db: DatabaseDependency,
-                                      sort: str = Query(default='desc', regex='^(desc|asc)$'),
-                                      order: str = Query(default='creation', regex='^(creation|rating)$')):
+def get_parking_lot_ratings_feedbacks(
+        parking_lot_id: int,
+        db: DatabaseDependency,
+        sort: str = Query(default='desc', regex='^(desc|asc)$'),
+        order: str = Query(default='creation', regex='^(creation|rating)$')
+):
     parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True).first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parking lot no found")

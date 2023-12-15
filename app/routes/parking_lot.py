@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, status, Query
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from fastapi_pagination import Page
@@ -16,18 +18,25 @@ router = APIRouter(
 
 
 @router.get('/', response_model=Page[ParkingLotOut], status_code=status.HTTP_200_OK)
-def get_all_parking_lots(db: DatabaseDependency):
-    return paginate(db.query(ParkingLot).filter(ParkingLot.is_active == True))
-
-
-@router.get('/{name}', response_model=Page[ParkingLotOut], status_code=status.HTTP_200_OK)
-def get_parking_lot_by_name(db: DatabaseDependency, name: str):
-    return paginate(db.query(ParkingLot).filter(ParkingLot.name.ilike(f'{name.lower()}%')))
+def get_all_parking_lots(
+        db: DatabaseDependency,
+        name: Optional[str] = Query(default=None)
+):
+    query = db.query(ParkingLot).filter(ParkingLot.is_active == True)
+    if name is not None:
+        query = query.filter(ParkingLot.name.ilike(f'{name.lower()}%'))
+    results = paginate(query)
+    if not results.items:
+        raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+    return results
 
 
 @router.post('/', response_model=ParkingLotCreateOut, status_code=status.HTTP_201_CREATED)
-def create_parking_lot(current_active_user: CurrentActiveUserDependency, parking_lot: ParkingLotCreate,
-                       db: DatabaseDependency):
+def create_parking_lot(
+        current_active_user: CurrentActiveUserDependency,
+        parking_lot: ParkingLotCreate,
+        db: DatabaseDependency
+):
     try:
         if not current_active_user.is_superuser:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
@@ -61,7 +70,6 @@ def update_parking_lot(parking_lot_id: int,
     try:
         parking_lot_update_dict = parking_lot_update.model_dump(exclude_unset=True)
         for key, value in parking_lot_update_dict.items():
-            print(key, value)
             if type(value) is dict:
                 current_value = getattr(parking_lot, key)
                 for sub_key, sub_value in value.items():

@@ -50,8 +50,36 @@ class TokenData(BaseModel):
     token_type: TokenType
     token: str
 
-
 # Parking Lot
+class VehicleCapacity(BaseModel):
+    total_visit: int = 0
+    vehicle_in_count: int = 0
+    vehicle_out_count: int = 0
+    current_capacity: int = 0
+    max_capacity: int = 0
+
+
+class ParkingLotSpace(BaseModel):
+    total: VehicleCapacity
+    car: VehicleCapacity
+    motorbike: VehicleCapacity
+    bicycle: VehicleCapacity
+
+
+class ParkingLotRatingDetail(BaseModel):
+    one_star: int = 0
+    two_star: int = 0
+    three_star: int = 0
+    four_star: int = 0
+    five_star: int = 0
+
+
+class ParkingLotRating(BaseModel):
+    total: int = 0
+    average: float = 0.0
+    detail: ParkingLotRatingDetail
+
+
 class BaseParkingLot(BaseModel):
     name: str
     longitude: float
@@ -77,6 +105,9 @@ class ParkingLotOut(BaseParkingLot):
     id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+
+    parking_space: ParkingLotSpace
+    rating: ParkingLotRating
 
 
 class ParkingLotAdminOut(ParkingLotOut):
@@ -294,32 +325,3 @@ class CameraOut(BaseCamera):
 
 class CameraUpdate(BaseModel):
     parking_lot_id: Optional[int]
-
-
-class VehicleCapacity(BaseModel):
-    total_visit: int
-    vehicle_in_count: int
-    vehicle_out_count: int
-    current_capacity: int
-    max_capacity: int
-
-
-class ParkingLotSpace(BaseModel):
-    total: VehicleCapacity
-    car: VehicleCapacity
-    motorbike: VehicleCapacity
-    bicycle: VehicleCapacity
-
-
-class ParkingLotRatingDetail(BaseModel):
-    one_star: int
-    two_star: int
-    three_star: int
-    four_star: int
-    five_star: int
-
-
-class ParkingLotRating(BaseModel):
-    total: int
-    average: float
-    detail: ParkingLotRatingDetail

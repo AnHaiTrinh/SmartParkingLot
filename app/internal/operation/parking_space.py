@@ -1,6 +1,9 @@
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, HTTPException, status, Query
+from sqlalchemy import nulls_first, asc
+
 from app.dependencies.db_connection import DatabaseDependency
 from app.dependencies.devices import CameraAuthDependency, SensorAuthDependency
 from app.models.models import ParkingSpace, Vehicle
@@ -18,13 +21,19 @@ def get_free_parking_space(
 ):
     parking_lot_id = camera.parking_lot_id
     parking_space = (db.query(ParkingSpace)
+                     .first(ParkingSpace.is_active == True)
                      .filter(ParkingSpace.parking_lot_id == parking_lot_id)
                      .filter(ParkingSpace.vehicle_id.is_(None))
+                     .order_by(nulls_first(asc(ParkingSpace.referred_at)))
                      .first())
     if not parking_space:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No parking space found')
     if parking_space.vehicle_id is not None:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='Parking space is occupied')
+    parking_space.referred_at = datetime.now()
+    parking_space.updated_at = datetime.now()
+    db.commit()
+    db.refresh(parking_space)
     return parking_space
 
 
@@ -47,6 +56,7 @@ def acknowledge_parking_space(
         if license_plate is not None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Unexpected field license_plate')
         parking_space.vehicle_id = None
+    parking_space.updated_at = datetime.now()
     db.commit()
     db.refresh(parking_space)
     return

@@ -64,6 +64,7 @@ class ParkingSpace(Base):
     latitude = Column(Float, nullable=False)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
+    referred_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_active = Column(Boolean, default=True)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
     vehicle_id = Column(Integer, ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=True)

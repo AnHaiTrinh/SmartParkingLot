@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException, status
+from typing import Optional
+
+from fastapi import APIRouter, HTTPException, status, Query
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 from fastapi_pagination import Page
@@ -18,14 +20,15 @@ router = APIRouter(
 
 
 @router.get('/', response_model=Page[VehicleOut], status_code=status.HTTP_200_OK)
-def get_all_vehicles(current_active_user: CurrentActiveUserDependency, db: DatabaseDependency):
-    return paginate(db.query(Vehicle).filter(Vehicle.owner_id == current_active_user.id))
-
-
-@router.get('/{license_plate}', response_model=Page[VehicleOut], status_code=status.HTTP_200_OK)
-def get_vehicles_by_name(current_active_user: CurrentActiveUserDependency, db: DatabaseDependency, license_plate: str):
-    results = paginate(db.query(Vehicle).filter(Vehicle.owner_id == current_active_user.id,
-                                                Vehicle.license_plate.ilike(f'{license_plate.lower()}%')))
+def get_all_vehicles(
+        current_active_user: CurrentActiveUserDependency,
+        db: DatabaseDependency,
+        license_plate: Optional[str] = Query(default=None)
+):
+    query = db.query(Vehicle).filter(Vehicle.owner_id == current_active_user.id)
+    if license_plate is not None:
+        query = query.filter(Vehicle.license_plate.islike(f'{license_plate.lower()}%'))
+    results = paginate(query)
     if not results.items:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     return results

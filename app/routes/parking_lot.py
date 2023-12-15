@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter, HTTPException, status, Query
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
@@ -16,21 +18,25 @@ router = APIRouter(
 
 
 @router.get('/', response_model=Page[ParkingLotOut], status_code=status.HTTP_200_OK)
-def get_all_parking_lots(db: DatabaseDependency):
-    return paginate(db.query(ParkingLot).filter(ParkingLot.is_active == True))
-
-
-@router.get('/{name}', response_model=Page[ParkingLotOut], status_code=status.HTTP_200_OK)
-def get_parking_lot_by_name(db: DatabaseDependency, name: str):
-    results = paginate(db.query(ParkingLot).filter(ParkingLot.name.ilike(f'{name.lower()}%')))
+def get_all_parking_lots(
+        db: DatabaseDependency,
+        name: Optional[str] = Query(default=None)
+):
+    query = db.query(ParkingLot).filter(ParkingLot.is_active == True)
+    if name is not None:
+        query = query.filter(ParkingLot.name.ilike(f'{name.lower()}%'))
+    results = paginate(query)
     if not results.items:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)
     return results
 
 
 @router.post('/', response_model=ParkingLotCreateOut, status_code=status.HTTP_201_CREATED)
-def create_parking_lot(current_active_user: CurrentActiveUserDependency, parking_lot: ParkingLotCreate,
-                       db: DatabaseDependency):
+def create_parking_lot(
+        current_active_user: CurrentActiveUserDependency,
+        parking_lot: ParkingLotCreate,
+        db: DatabaseDependency
+):
     try:
         if not current_active_user.is_superuser:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')

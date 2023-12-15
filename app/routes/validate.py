@@ -57,34 +57,33 @@ def validate_activity_logs(validate_activity_logs: List[ValidateActivityLog], cu
     new_activity_logs = []
     for validate_activity_log in validate_activity_logs:
         parking_lot = db.query(ParkingLot).filter(ParkingLot.id == validate_activity_log.parking_lot_id).first()
-        if not parking_lot:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')
-        vehicle = db.query(Vehicle).filter(Vehicle.license_plate == validate_activity_log.license_plate).first()
-        if vehicle:
-            new_activity_log = ActivityLog(
-                user_id=vehicle.owner_id,
-                parking_lot_id=validate_activity_log.parking_lot_id,
-                activity_type=validate_activity_log.activity_type,
-                license_plate=validate_activity_log.license_plate,
-                timestamp=validate_activity_log.created_at
-            )
-            new_activity_logs.append(new_activity_log)
-        else:
-            new_vehicle = Vehicle(
-                license_plate=validate_activity_log.license_plate,
-                vehicle_type=validate_activity_log.vehicle_type,
-                owner_id=current_active_user.id,
-                created_at=validate_activity_log.created_at
-            )
-            new_activity_log = ActivityLog(
-                user_id=new_vehicle.owner_id,
-                parking_lot_id=validate_activity_log.parking_lot_id,
-                activity_type=validate_activity_log.activity_type,
-                license_plate=validate_activity_log.license_plate,
-                timestamp=validate_activity_log.created_at
-            )
-            new_vehicles.append(new_vehicle)
-            new_activity_logs.append(new_activity_log)
+        if parking_lot:
+            vehicle = db.query(Vehicle).filter(Vehicle.license_plate == validate_activity_log.license_plate).first()
+            if vehicle:
+                new_activity_log = ActivityLog(
+                    user_id=vehicle.owner_id,
+                    parking_lot_id=validate_activity_log.parking_lot_id,
+                    activity_type=validate_activity_log.activity_type,
+                    license_plate=validate_activity_log.license_plate,
+                    timestamp=validate_activity_log.created_at
+                )
+                new_activity_logs.append(new_activity_log)
+            else:
+                new_vehicle = Vehicle(
+                    license_plate=validate_activity_log.license_plate,
+                    vehicle_type=validate_activity_log.vehicle_type,
+                    owner_id=current_active_user.id,
+                    created_at=validate_activity_log.created_at
+                )
+                new_activity_log = ActivityLog(
+                    user_id=new_vehicle.owner_id,
+                    parking_lot_id=validate_activity_log.parking_lot_id,
+                    activity_type=validate_activity_log.activity_type,
+                    license_plate=validate_activity_log.license_plate,
+                    timestamp=validate_activity_log.created_at
+                )
+                new_vehicles.append(new_vehicle)
+                new_activity_logs.append(new_activity_log)
     db.add_all(new_vehicles)
     db.add_all(new_activity_logs)
     db.commit()

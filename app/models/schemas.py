@@ -1,4 +1,5 @@
 from enum import Enum
+from uuid import uuid4, UUID
 
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
@@ -51,23 +52,10 @@ class TokenData(BaseModel):
 
 
 # Parking Lot
-class AvailableSpaces(BaseModel):
-    car: int
-    motorbike: int
-    bicycle: int
-
-
-class OptionalAvailableSpaces(BaseModel):
-    car: Optional[int] = None
-    motorbike: Optional[int] = None
-    bicycle: Optional[int] = None
-
-
 class BaseParkingLot(BaseModel):
     name: str
     longitude: float
     latitude: float
-    available_spaces: AvailableSpaces
 
 
 class ParkingLotCreate(BaseParkingLot):
@@ -78,7 +66,6 @@ class ParkingLotUpdate(BaseModel):
     name: Optional[str] = None
     longitude: Optional[float] = None
     latitude: Optional[float] = None
-    available_spaces: Optional[OptionalAvailableSpaces] = None
 
 
 class ParkingLotCreateOut(BaseParkingLot):
@@ -106,9 +93,15 @@ class Owner(BaseModel):
     is_active: bool
 
 
+class VehicleType(str, Enum):
+    car = 'car'
+    motorbike = 'motorbike'
+    bicycle = 'bicycle'
+
+
 class BaseVehicle(BaseModel):
     license_plate: str
-    vehicle_type: str
+    vehicle_type: VehicleType
 
 
 class VehicleCreate(BaseVehicle):
@@ -116,11 +109,15 @@ class VehicleCreate(BaseVehicle):
 
 
 class VehicleCreateOut(BaseVehicle):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
 
 
 class VehicleOut(BaseVehicle):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
 
@@ -195,3 +192,134 @@ class RatingFeedbackOut(BaseRatingFeedback):
 class RatingFeedbackAdminOut(RatingFeedbackOut):
     is_active: bool
     deleted_at: Optional[datetime] = None
+
+
+# Parking Space
+class BaseParkingSpace(BaseModel):
+    longitude: float
+    latitude: float
+    parking_lot_id: int
+
+
+class ParkingSpaceCreate(BaseParkingSpace):
+    pass
+
+
+class ParkingSpaceCreateOut(BaseParkingSpace):
+    id: int
+    is_active: bool
+    created_at: datetime
+
+
+class ParkingSpaceOut(BaseParkingSpace):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    is_active: bool
+
+    parking_lot: ParkingLotOut
+
+
+class ParkingSpaceUpdate(BaseModel):
+    longitude: Optional[float]
+    latitude: Optional[float]
+    parking_lot_id: Optional[int]
+
+
+class ParkingSpaceAdminOut(ParkingSpaceOut):
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+
+    vehicle: Optional[VehicleOut] = None
+
+
+# Sensor
+class BaseSensor(BaseModel):
+    id: UUID = uuid4()
+    parking_space_id: int
+
+
+class SensorCreate(BaseSensor):
+    pass
+
+
+class SensorCreateOut(BaseSensor):
+    api_key: str
+    created_at: datetime
+    is_active: bool
+
+
+class SensorOut(BaseSensor):
+    model_config = ConfigDict(from_attributes=True)
+
+    created_at: datetime
+    is_active: bool
+    updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+
+    parking_space: ParkingSpaceOut
+
+
+class SensorUpdate(BaseModel):
+    parking_space_id: Optional[int]
+
+
+# Camera
+class BaseCamera(BaseModel):
+    id: UUID = uuid4()
+    parking_lot_id: int
+
+
+class CameraCreate(BaseCamera):
+    pass
+
+
+class CameraCreateOut(BaseCamera):
+    api_key: str
+    created_at: datetime
+    is_active: bool
+
+
+class CameraOut(BaseCamera):
+    model_config = ConfigDict(from_attributes=True)
+
+    created_at: datetime
+    is_active: bool
+    updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+
+    parking_lot: ParkingLotOut
+
+
+class CameraUpdate(BaseModel):
+    parking_lot_id: Optional[int]
+
+
+class VehicleCapacity(BaseModel):
+    total_visit: int
+    vehicle_in_count: int
+    vehicle_out_count: int
+    current_capacity: int
+    max_capacity: int
+
+
+class ParkingLotSpace(BaseModel):
+    total: VehicleCapacity
+    car: VehicleCapacity
+    motorbike: VehicleCapacity
+    bicycle: VehicleCapacity
+
+
+class ParkingLotRatingDetail(BaseModel):
+    one_star: int
+    two_star: int
+    three_star: int
+    four_star: int
+    five_star: int
+
+
+class ParkingLotRating(BaseModel):
+    total: int
+    average: float
+    detail: ParkingLotRatingDetail

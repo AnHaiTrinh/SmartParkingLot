@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Boolean, Float, ForeignKey, JSON
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import TIMESTAMP
-from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.configs.db_configs import Base
 
@@ -28,9 +28,8 @@ class ParkingLot(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True, index=True)
     name = Column(String, unique=True, index=True)
-    longitude = Column(Float)
-    latitude = Column(Float)
-    available_spaces = Column(MutableDict.as_mutable(JSON), nullable=True)
+    longitude = Column(Float, nullable=False)
+    latitude = Column(Float, nullable=False)
     created_at = Column(TIMESTAMP, server_default=text("now()"))
     updated_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_active = Column(Boolean, default=True)
@@ -38,6 +37,56 @@ class ParkingLot(Base):
 
     ratings_feedbacks = relationship("RatingFeedback", back_populates="parking_lot")
     activity_logs = relationship("ActivityLog", back_populates="parking_lot")
+    cameras = relationship("Camera", back_populates="parking_lot")
+    parking_spaces = relationship("ParkingSpace", back_populates="parking_lot")
+
+
+class Sensor(Base):
+    __tablename__ = "sensors"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True)
+    api_key = Column(String, unique=True, nullable=False, index=True,
+                     server_default=text("encode(sha256(random()::text::bytea), 'hex')"))
+    parking_space_id = Column(Integer, ForeignKey("parking_spaces.id", ondelete="CASCADE"))
+    created_at = Column(TIMESTAMP, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP, server_default=text("NULL"))
+    is_active = Column(Boolean, default=True)
+    deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
+
+    parking_space = relationship("ParkingSpace", back_populates="sensor")
+
+
+class ParkingSpace(Base):
+    __tablename__ = "parking_spaces"
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    longitude = Column(Float, nullable=False)
+    latitude = Column(Float, nullable=False)
+    created_at = Column(TIMESTAMP, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP, server_default=text("NULL"))
+    is_active = Column(Boolean, default=True)
+    deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
+    vehicle_id = Column(Integer, ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=True)
+    parking_lot_id = Column(Integer, ForeignKey("parking_lots.id", ondelete="CASCADE"))
+
+    sensor = relationship("Sensor", uselist=False, back_populates="parking_space")
+    vehicle = relationship("Vehicle")
+    parking_lot = relationship("ParkingLot", back_populates="parking_spaces")
+
+
+class Camera(Base):
+    __tablename__ = "cameras"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, index=True)
+    api_key = Column(String, unique=True, nullable=False, index=True,
+                     server_default=text("encode(sha256(random()::text::bytea), 'hex')"))
+    parking_lot_id = Column(Integer, ForeignKey("parking_lots.id", ondelete="CASCADE"))
+    created_at = Column(TIMESTAMP, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP, server_default=text("NULL"))
+    is_active = Column(Boolean, default=True)
+    deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
+
+    parking_lot = relationship("ParkingLot", back_populates="cameras")
 
 
 class Vehicle(Base):

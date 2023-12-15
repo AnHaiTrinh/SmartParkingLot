@@ -5,10 +5,10 @@ from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import func
 
-from ..dependencies.db_connection import DatabaseDependency
-from ..dependencies.oauth2 import CurrentActiveUserDependency
-from ..models.models import RatingFeedback
-from ..models.schemas import RatingFeedbackAdminOut
+from app.dependencies.db_connection import DatabaseDependency
+from app.dependencies.oauth2 import CurrentActiveUserDependency
+from app.models.models import RatingFeedback
+from app.models.schemas import RatingFeedbackAdminOut
 
 router = APIRouter(prefix='/ratings_feedbacks')
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix='/ratings_feedbacks')
 def get_rating_feedbacks(
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,
-        show_deleted: Optional[bool] = Query(default=False),
+        show_deleted: bool = Query(default=False),
         sort: str = Query(default='desc', regex='^(desc|asc)$'),
         order: str = Query(default='creation', regex='^(creation|rating)$'),
         user_id: Optional[int] = Query(default=None),

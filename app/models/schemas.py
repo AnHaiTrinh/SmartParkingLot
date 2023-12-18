@@ -325,3 +325,12 @@ class CameraOut(BaseCamera):
 
 class CameraUpdate(BaseModel):
     parking_lot_id: Optional[int]
+
+
+# validate
+class ValidateActivityLog_Enter(BaseModel):
+    parking_lot_id: int
+    license_plate: str
+    vehicle_type: str
+    activity_type: str
+    created_at: datetime

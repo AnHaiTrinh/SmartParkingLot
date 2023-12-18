@@ -230,6 +230,7 @@ class BaseParkingSpace(BaseModel):
     longitude: float
     latitude: float
     parking_lot_id: int
+    vehicle_type: VehicleType
 
 
 class ParkingSpaceCreate(BaseParkingSpace):

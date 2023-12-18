@@ -67,6 +67,7 @@ class ParkingSpace(Base):
     referred_at = Column(TIMESTAMP, server_default=text("NULL"))
     is_active = Column(Boolean, default=True)
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
+    vehicle_type = Column(String, nullable=False)
     vehicle_id = Column(Integer, ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=True)
     parking_lot_id = Column(Integer, ForeignKey("parking_lots.id", ondelete="CASCADE"))
 

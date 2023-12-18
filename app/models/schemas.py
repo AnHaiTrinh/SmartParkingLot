@@ -334,3 +334,14 @@ class ValidateActivityLog_Enter(BaseModel):
     vehicle_type: str
     activity_type: str
     created_at: datetime
+
+class ValidateActivityLog_Exit(BaseModel):
+    parking_lot_id: int
+    license_plate: str
+    user_id: int
+    vehicle_type: str
+    activity_type: str
+    created_at: datetime
+    duration: int
+    fee: int
+

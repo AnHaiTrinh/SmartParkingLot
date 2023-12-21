@@ -206,7 +206,6 @@ class RatingFeedbackCreateOut(BaseRatingFeedback):
 
     id: int
     user: User
-    parking_lot: ParkingLot
     created_at: datetime
 
 

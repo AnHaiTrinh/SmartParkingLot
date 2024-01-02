@@ -57,6 +57,14 @@ def get_all_users(
         query = query.filter(User.username.ilike(f'{username.lower()}%'))
     return paginate(query)
 
+@router.get('/all_admin', response_model=List[UserOut], status_code=status.HTTP_200_OK)
+def get_all_admin(db: DatabaseDependency, 
+                    current_active_user: CurrentActiveUserDependency):
+    if not current_active_user.is_superuser:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
+    users = db.query(User).filter(User.is_superuser == True).all()
+    return users
+
 
 @router.get('/{user_id}', response_model=UserOut, status_code=status.HTTP_200_OK)
 def get_user_by_id(user_id: int, db: DatabaseDependency, current_active_user: CurrentActiveUserDependency):

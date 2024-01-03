@@ -20,9 +20,13 @@ router = APIRouter(
 @router.get('/', response_model=Page[ParkingLotOut], status_code=status.HTTP_200_OK)
 def get_all_parking_lots(
         db: DatabaseDependency,
-        name: Optional[str] = Query(default=None)
+        current_active_user: CurrentActiveUserDependency,
+        show_deleted: bool = Query(default=False),
+        name: Optional[str] = Query(default=None),
 ):
-    query = db.query(ParkingLot).filter(ParkingLot.is_active == True)
+    query = db.query(ParkingLot)
+    if not current_active_user.is_superuser or not show_deleted:
+        query = query.filter(ParkingLot.is_active == True)
     if name is not None:
         query = query.filter(ParkingLot.name.ilike(f'{name.lower()}%'))
     results = paginate(query)
@@ -35,7 +39,7 @@ def get_all_parking_lots(
 def create_parking_lot(
         current_active_user: CurrentActiveUserDependency,
         parking_lot: ParkingLotCreate,
-        db: DatabaseDependency
+        db: DatabaseDependency,
 ):
     try:
         if not current_active_user.is_superuser:
@@ -50,18 +54,26 @@ def create_parking_lot(
 
 
 @router.get('/{parking_lot_id}', response_model=ParkingLotOut, status_code=status.HTTP_200_OK)
-def get_parking_lot_by_id(parking_lot_id: int, db: DatabaseDependency):
+def get_parking_lot_by_id(
+        parking_lot_id: int,
+        db: DatabaseDependency,
+        current_active_user: CurrentActiveUserDependency
+):
     parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True).first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')
+    if not (parking_lot.is_active or current_active_user.is_superuser):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     return parking_lot
 
 
 @router.put('/{parking_lot_id}', response_model=ParkingLotOut, status_code=status.HTTP_200_OK)
-def update_parking_lot(parking_lot_id: int,
-                       parking_lot_update: ParkingLotUpdate,
-                       current_active_user: CurrentActiveUserDependency,
-                       db: DatabaseDependency):
+def update_parking_lot(
+        parking_lot_id: int,
+        parking_lot_update: ParkingLotUpdate,
+        current_active_user: CurrentActiveUserDependency,
+        db: DatabaseDependency
+):
     if not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True).first()
@@ -70,12 +82,6 @@ def update_parking_lot(parking_lot_id: int,
     try:
         parking_lot_update_dict = parking_lot_update.model_dump(exclude_unset=True)
         for key, value in parking_lot_update_dict.items():
-            if type(value) is dict:
-                current_value = getattr(parking_lot, key)
-                for sub_key, sub_value in value.items():
-                    current_value[sub_key] = sub_value
-                setattr(parking_lot, key, current_value)
-            else:
                 setattr(parking_lot, key, value)
         parking_lot.updated_at = datetime.now()
         db.commit()

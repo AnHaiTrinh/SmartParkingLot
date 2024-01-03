@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.internal import activity_log, rating_feedback, vehicle, parking_lot
+from app.internal.admin import activity_log, parking_lot, rating_feedback, vehicle
 
 router = APIRouter(
     prefix='/admin',

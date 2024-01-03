@@ -4,10 +4,10 @@ from fastapi import APIRouter, status, Query, HTTPException
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..dependencies.db_connection import DatabaseDependency
-from ..dependencies.oauth2 import CurrentActiveUserDependency
-from ..models.schemas import ParkingLotAdminOut
-from ..models.models import ParkingLot
+from app.dependencies.db_connection import DatabaseDependency
+from app.dependencies.oauth2 import CurrentActiveUserDependency
+from app.models.schemas import ParkingLotAdminOut
+from app.models.models import ParkingLot
 
 router = APIRouter(prefix='/parking_lots')
 

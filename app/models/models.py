@@ -76,7 +76,7 @@ class ParkingSpace(Base):
     deleted_at = Column(TIMESTAMP, server_default=text("NULL"))
     vehicle_type = Column(String, nullable=False)
     state = Column(String, nullable=False, server_default=text("'free'"))
-    vehicle_id = Column(Integer, ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=True)
+    vehicle_id = Column(Integer, ForeignKey("vehicles.id", ondelete="CASCADE"), nullable=True, unique=True)
     parking_lot_id = Column(Integer, ForeignKey("parking_lots.id", ondelete="CASCADE"))
 
     sensor = relationship("Sensor", uselist=False, back_populates="parking_space")

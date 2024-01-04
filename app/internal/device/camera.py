@@ -11,8 +11,8 @@ from app.models.models import Camera
 from app.models.schemas import CameraOut, CameraCreateOut, CameraCreate
 
 router = APIRouter(
-    prefix='/camera',
-    tags=['Camera']
+    prefix='/cameras',
+    tags=['Cameras']
 )
 
 

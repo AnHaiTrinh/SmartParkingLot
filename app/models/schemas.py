@@ -265,16 +265,3 @@ class SensorOut(SensorBase):
     created_at: datetime
     is_active: bool
     deleted_at: Optional[datetime] = None
-
-
-# Reserve Order
-class ReserveOrder(BaseModel):
-    parking_space_id: int
-    vehicle_id: int
-
-
-# Validation
-class ValidateModel(BaseModel):
-    license_plate: str
-    user_id: int
-    timestamp: datetime

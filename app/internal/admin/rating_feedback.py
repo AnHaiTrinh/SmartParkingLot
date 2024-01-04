@@ -5,10 +5,10 @@ from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy import func
 
-from ..dependencies.db_connection import DatabaseDependency
-from ..dependencies.oauth2 import CurrentActiveUserDependency
-from ..models.models import RatingFeedback
-from ..models.schemas import RatingFeedbackAdminOut
+from app.dependencies.db_connection import DatabaseDependency
+from app.dependencies.oauth2 import CurrentActiveUserDependency
+from app.models.models import RatingFeedback
+from app.models.schemas import RatingFeedbackAdminOut
 
 router = APIRouter(prefix='/ratings_feedbacks')
 

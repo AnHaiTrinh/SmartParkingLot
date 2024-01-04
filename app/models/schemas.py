@@ -1,6 +1,7 @@
 from enum import Enum
+from uuid import uuid4, UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import datetime
 from typing import Optional
 
@@ -18,7 +19,6 @@ class UserCreateOut(BaseUser):
     id: int
     is_active: bool
     is_superuser: bool
-    created_at: datetime
 
 
 class UserOut(BaseUser):
@@ -51,53 +51,44 @@ class TokenData(BaseModel):
 
 
 # Parking Lot
-class AvailableSpaces(BaseModel):
-    car: int
-    motorbike: int
-    bicycle: int
-
-
-class OptionalAvailableSpaces(BaseModel):
-    car: Optional[int] = None
-    motorbike: Optional[int] = None
-    bicycle: Optional[int] = None
-
-
-class BaseParkingLot(BaseModel):
+class ParkingLotBase(BaseModel):
     name: str
     longitude: float
     latitude: float
-    available_spaces: AvailableSpaces
 
 
-class ParkingLotCreate(BaseParkingLot):
+class ParkingLotCreate(ParkingLotBase):
     pass
+
+
+class ParkingLotCreateOut(ParkingLotBase):
+    id: int
+
+
+class ParkingLotOut(ParkingLotBase):
+    id: int
 
 
 class ParkingLotUpdate(BaseModel):
     name: Optional[str] = None
     longitude: Optional[float] = None
     latitude: Optional[float] = None
-    available_spaces: Optional[OptionalAvailableSpaces] = None
-
-
-class ParkingLotCreateOut(BaseParkingLot):
-    id: int
-    created_at: datetime
-
-
-class ParkingLotOut(BaseParkingLot):
-    id: int
-    created_at: datetime
-    updated_at: Optional[datetime] = None
 
 
 class ParkingLotAdminOut(ParkingLotOut):
     is_active: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
     deleted_at: Optional[datetime] = None
 
 
 # Vehicle
+class VehicleType(str, Enum):
+    car = 'car'
+    motorbike = 'motorbike'
+    truck = 'truck'
+
+
 class Owner(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -122,12 +113,13 @@ class VehicleCreateOut(BaseVehicle):
 
 class VehicleOut(BaseVehicle):
     id: int
-    created_at: datetime
 
 
 class VehicleAdminOut(VehicleOut):
     model_config = ConfigDict(from_attributes=True)
 
+    created_at: datetime
+    updated_at: Optional[datetime] = None
     is_tracked: bool
     owner: Owner
 
@@ -152,10 +144,13 @@ class ActivityLogOut(BaseModel):
 
     id: int
     parking_lot: ParkingLot
-    user: User
     timestamp: datetime
     activity_type: str
-    license_plate: str
+    vehicle: VehicleOut
+
+
+class ActivityLogAdminOut(ActivityLogOut):
+    user: User
 
 
 # Rating Feedback
@@ -193,5 +188,80 @@ class RatingFeedbackOut(BaseRatingFeedback):
 
 
 class RatingFeedbackAdminOut(RatingFeedbackOut):
+    is_active: bool
+    deleted_at: Optional[datetime] = None
+
+
+class ParkingSpaceBase(BaseModel):
+    longitude: int
+    latitude: int
+    parking_lot_id: int
+    vehicle_type: VehicleType
+
+
+class ParkingSpaceCreate(ParkingSpaceBase):
+    pass
+
+
+class ParkingSpaceCreateOut(ParkingSpaceBase):
+    id: int
+    created_at: datetime
+    state: str
+
+
+class ParkingSpaceOut(ParkingSpaceBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    state: str
+    vehicle: Optional[VehicleOut] = None
+
+
+class ParkingSpaceAdminOut(ParkingSpaceOut):
+    is_active: bool
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    deleted_at: Optional[datetime] = None
+    parking_lot: ParkingLotAdminOut
+
+
+# Camera
+class CameraBase(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    parking_lot_id: int
+
+
+class CameraCreate(CameraBase):
+    pass
+
+
+class CameraCreateOut(CameraBase):
+    created_at: datetime
+    api_key: str
+
+
+class CameraOut(CameraBase):
+    created_at: datetime
+    is_active: bool
+    created_at: Optional[datetime] = None
+
+
+# Sensor
+class SensorBase(BaseModel):
+    id: UUID = Field(default_factory=uuid4)
+    parking_space_id: int
+
+
+class SensorCreate(SensorBase):
+    pass
+
+
+class SensorCreateOut(SensorBase):
+    created_at: datetime
+    api_key: str
+
+
+class SensorOut(SensorBase):
+    created_at: datetime
     is_active: bool
     deleted_at: Optional[datetime] = None

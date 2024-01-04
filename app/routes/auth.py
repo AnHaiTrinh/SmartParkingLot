@@ -41,7 +41,7 @@ def login(response: Response, db: DatabaseDependency,
         secret_key=os.getenv('JWT_REFRESH_SECRET_KEY'),
         expiry={'days': int(os.getenv('REFRESH_TOKEN_EXPIRE_DAYS'))}
     )
-    redis_client.set(refresh_token, user.id)
+    redis_client.set(refresh_token, user.id, ex=int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')) * 60)
 
     response.set_cookie(key='jwt', value=refresh_token, httponly=True, secure=True, samesite='none',
                         max_age=24 * 60 * 60)

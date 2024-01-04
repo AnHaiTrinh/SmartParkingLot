@@ -7,7 +7,7 @@ docker-compose.yml
 .gitignore
 .idea
 .git
-*.env
+*.env*
 
 # Ignore mount volume
 .db_data

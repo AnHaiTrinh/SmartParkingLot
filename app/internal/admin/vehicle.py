@@ -1,13 +1,14 @@
+from datetime import datetime
 from typing import Optional
 
 from fastapi import APIRouter, status, Query, HTTPException
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..dependencies.db_connection import DatabaseDependency
-from ..dependencies.oauth2 import CurrentActiveUserDependency
-from ..models.models import Vehicle
-from ..models.schemas import VehicleAdminOut
+from app.dependencies.db_connection import DatabaseDependency
+from app.dependencies.oauth2 import CurrentActiveUserDependency
+from app.models.models import Vehicle
+from app.models.schemas import VehicleAdminOut
 
 router = APIRouter(prefix='/vehicles')
 
@@ -45,6 +46,7 @@ def track_vehicles(
     if vehicle is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Vehicle not found')
     vehicle.is_tracked = track
+    vehicle.updated_at = datetime.now()
     db.commit()
     db.refresh(vehicle)
     return vehicle

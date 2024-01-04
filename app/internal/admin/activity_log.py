@@ -5,15 +5,15 @@ from fastapi import APIRouter, Query, status, HTTPException
 from fastapi_pagination import Page
 from fastapi_pagination.ext.sqlalchemy import paginate
 
-from ..dependencies.db_connection import DatabaseDependency
-from ..dependencies.oauth2 import CurrentActiveUserDependency
-from ..models.models import ActivityLog
-from ..models.schemas import ActivityLogOut
+from app.dependencies.db_connection import DatabaseDependency
+from app.dependencies.oauth2 import CurrentActiveUserDependency
+from app.models.models import ActivityLog
+from app.models.schemas import ActivityLogAdminOut
 
 router = APIRouter(prefix='/activity_logs')
 
 
-@router.get('/', response_model=Page[ActivityLogOut], status_code=status.HTTP_200_OK)
+@router.get('/', response_model=Page[ActivityLogAdminOut], status_code=status.HTTP_200_OK)
 def get_activity_logs(
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,

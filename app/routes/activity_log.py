@@ -5,7 +5,7 @@ from fastapi_pagination.ext.sqlalchemy import paginate
 from fastapi_pagination import Page
 
 from ..models.schemas import ActivityLogOut
-from ..models.models import ActivityLog
+from ..models.models import ActivityLog, Vehicle
 from ..dependencies.db_connection import DatabaseDependency
 from ..dependencies.oauth2 import CurrentActiveUserDependency
 
@@ -27,7 +27,8 @@ def get_parking_lot_activity_logs(
     to_timestamp = datetime.fromtimestamp(totime)
     order_by = ActivityLog.timestamp.desc() if sort == 'desc' else ActivityLog.timestamp.asc()
     return paginate(db.query(ActivityLog)
-                    .filter(ActivityLog.user_id == current_active_user.id,
+                    .join(ActivityLog.vehicle)
+                    .filter(Vehicle.owner_id == current_active_user.id,
                             from_timestamp <= ActivityLog.timestamp,
                             ActivityLog.timestamp <= to_timestamp)
                     .order_by(order_by))

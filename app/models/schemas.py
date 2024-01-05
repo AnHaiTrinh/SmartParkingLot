@@ -149,8 +149,14 @@ class ActivityLogOut(BaseModel):
     vehicle: VehicleOut
 
 
-class ActivityLogAdminOut(ActivityLogOut):
-    user: User
+class ActivityLogAdminOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    parking_lot: ParkingLotAdminOut
+    timestamp: datetime
+    activity_type: str
+    vehicle: VehicleAdminOut
 
 
 # Rating Feedback

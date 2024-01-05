@@ -24,7 +24,7 @@ def get_vehicles(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='User does not have admin privileges')
     query = db.query(Vehicle)
     if user_id is not None:
-        query = query.filter(Vehicle.user_id == user_id)
+        query = query.filter(Vehicle.owner_id == user_id)
     if license_plate is not None:
         query = query.filter(Vehicle.license_plate == license_plate)
     results = paginate(query)

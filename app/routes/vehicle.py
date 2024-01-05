@@ -27,7 +27,7 @@ def get_all_vehicles(
 ):
     query = db.query(Vehicle).filter(Vehicle.owner_id == current_active_user.id)
     if license_plate is not None:
-        query = query.filter(Vehicle.license_plate.islike(f'{license_plate.lower()}%'))
+        query = query.filter(Vehicle.license_plate.ilike(f'{license_plate.lower()}%'))
     results = paginate(query)
     if not results.items:
         raise HTTPException(status_code=status.HTTP_204_NO_CONTENT)

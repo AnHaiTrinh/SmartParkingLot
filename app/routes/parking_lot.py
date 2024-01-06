@@ -59,7 +59,7 @@ def get_parking_lot_by_id(
         db: DatabaseDependency,
         current_active_user: CurrentActiveUserDependency
 ):
-    parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id, ParkingLot.is_active == True).first()
+    parking_lot = db.query(ParkingLot).filter(ParkingLot.id == parking_lot_id).first()
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')
     if not (parking_lot.is_active or current_active_user.is_superuser):
@@ -82,7 +82,7 @@ def update_parking_lot(
     try:
         parking_lot_update_dict = parking_lot_update.model_dump(exclude_unset=True)
         for key, value in parking_lot_update_dict.items():
-                setattr(parking_lot, key, value)
+            setattr(parking_lot, key, value)
         parking_lot.updated_at = datetime.now()
         db.commit()
         db.refresh(parking_lot)

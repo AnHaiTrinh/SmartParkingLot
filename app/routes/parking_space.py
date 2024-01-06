@@ -50,7 +50,7 @@ def get_parking_space_by_id(
     parking_space = db.query(ParkingSpace).filter(ParkingSpace.id == parking_space_id).first()
     if not parking_space:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking space not found')
-    if not parking_space.is_active or current_active_user.is_superuser:
+    if not (parking_space.is_active or current_active_user.is_superuser):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     return parking_space
 

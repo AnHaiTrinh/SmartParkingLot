@@ -40,6 +40,6 @@ def get_activity_log_by_id(activity_log_id: int, current_active_user: CurrentAct
     activity_log = db.query(ActivityLog).filter(ActivityLog.id == activity_log_id).first()
     if not activity_log:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Activity log not found')
-    if activity_log.user_id != current_active_user.id:
+    if activity_log.vehicle_id not in [v.id for v in current_active_user.vehicles]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     return activity_log

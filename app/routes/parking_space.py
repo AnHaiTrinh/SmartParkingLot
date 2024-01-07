@@ -83,6 +83,6 @@ def delete_parking_space(parking_space_id: int, db: DatabaseDependency,
     if not parking_space:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking space not found')
     parking_space.is_active = False
-    parking_space.deleted_at = datetime.now()
+    parking_space.deleted_at = datetime.utcnow()
     db.commit()
     return

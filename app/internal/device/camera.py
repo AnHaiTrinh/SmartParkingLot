@@ -78,6 +78,6 @@ def delete_camera(
     if not camera:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Camera not found')
     camera.is_active = False
-    camera.deleted_at = datetime.now()
+    camera.deleted_at = datetime.utcnow()
     db.commit()
     return

@@ -39,7 +39,7 @@ def create_vehicle(vehicle: VehicleCreate, current_active_user: CurrentActiveUse
     try:
         new_vehicle = Vehicle(**vehicle.model_dump())
         new_vehicle.owner = current_active_user
-        new_vehicle.created_at = datetime.now()
+        new_vehicle.created_at = datetime.utcnow()
         db.add(new_vehicle)
         db.commit()
         db.refresh(new_vehicle)

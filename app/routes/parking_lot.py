@@ -83,7 +83,7 @@ def update_parking_lot(
         parking_lot_update_dict = parking_lot_update.model_dump(exclude_unset=True)
         for key, value in parking_lot_update_dict.items():
             setattr(parking_lot, key, value)
-        parking_lot.updated_at = datetime.now()
+        parking_lot.updated_at = datetime.utcnow()
         db.commit()
         db.refresh(parking_lot)
         return parking_lot
@@ -99,6 +99,6 @@ def delete_parking_lot(parking_lot_id: int, current_active_user: CurrentActiveUs
     if not parking_lot:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Parking lot not found')
     parking_lot.is_active = False
-    parking_lot.deleted_at = datetime.now()
+    parking_lot.deleted_at = datetime.utcnow()
     db.commit()
     return

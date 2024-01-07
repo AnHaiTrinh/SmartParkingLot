@@ -76,7 +76,7 @@ def update_rating_feedback(parking_lot_id: int,
     rating_feedback_update_dict = rating_feedback_update.model_dump(exclude_unset=True)
     for key, value in rating_feedback_update_dict.items():
         setattr(rating_feedback, key, value)
-    rating_feedback.updated_at = datetime.now()
+    rating_feedback.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(rating_feedback)
     return rating_feedback
@@ -94,6 +94,6 @@ def delete_rating_feedback(parking_lot_id: int,
     if rating_feedback.user_id != current_active_user.id and not current_active_user.is_superuser:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='Not allowed')
     rating_feedback.is_active = False
-    rating_feedback.deleted_at = datetime.now()
+    rating_feedback.deleted_at = datetime.utcnow()
     db.commit()
     return

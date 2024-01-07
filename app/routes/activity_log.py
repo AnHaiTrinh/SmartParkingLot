@@ -20,7 +20,7 @@ def get_parking_lot_activity_logs(
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,
         fromtime: int = Query(default=0, ge=0),
-        totime: int = Query(default_factory=lambda: int(datetime.now().timestamp()), ge=0),
+        totime: int = Query(default_factory=lambda: int(datetime.utcnow().timestamp()), ge=0),
         sort: str = Query(default='desc', regex='^(desc|asc)$')
 ):
     from_timestamp = datetime.fromtimestamp(fromtime)

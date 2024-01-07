@@ -46,7 +46,7 @@ def track_vehicles(
     if vehicle is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Vehicle not found')
     vehicle.is_tracked = track
-    vehicle.updated_at = datetime.now()
+    vehicle.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(vehicle)
     return vehicle

@@ -78,6 +78,6 @@ def delete_sensor(
     if not sensor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Camera not found')
     sensor.is_active = False
-    sensor.deleted_at = datetime.now()
+    sensor.deleted_at = datetime.utcnow()
     db.commit()
     return

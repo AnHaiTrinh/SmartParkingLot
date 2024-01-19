@@ -24,7 +24,7 @@ def get_vehicles(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='User does not have admin privileges')
     query = db.query(Vehicle)
     if user_id is not None:
-        query = query.filter(Vehicle.user_id == user_id)
+        query = query.filter(Vehicle.owner_id == user_id)
     if license_plate is not None:
         query = query.filter(Vehicle.license_plate == license_plate)
     results = paginate(query)
@@ -46,7 +46,7 @@ def track_vehicles(
     if vehicle is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Vehicle not found')
     vehicle.is_tracked = track
-    vehicle.updated_at = datetime.now()
+    vehicle.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(vehicle)
     return vehicle

@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Query, HTTPException, status
 from fastapi_pagination import Page
@@ -38,7 +39,7 @@ def get_all_sensors(
 
 @router.get('/{sensor_id}', response_model=SensorOut, status_code=status.HTTP_200_OK)
 def get_sensor_by_id(
-        sensor_id: int,
+        sensor_id: UUID,
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,
 ):
@@ -67,7 +68,7 @@ def create_sensor(
 
 @router.delete('/{sensor_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_sensor(
-        sensor_id: int,
+        sensor_id: UUID,
         db: DatabaseDependency,
         current_active_user: CurrentActiveUserDependency
 ):
@@ -77,6 +78,6 @@ def delete_sensor(
     if not sensor:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Camera not found')
     sensor.is_active = False
-    sensor.deleted_at = datetime.now()
+    sensor.deleted_at = datetime.utcnow()
     db.commit()
     return

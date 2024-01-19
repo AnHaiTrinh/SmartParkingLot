@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from fastapi import APIRouter, Query, HTTPException, status
 from fastapi_pagination import Page
@@ -38,7 +39,7 @@ def get_all_cameras(
 
 @router.get('/{camera_id}', response_model=CameraOut, status_code=status.HTTP_200_OK)
 def get_camera_by_id(
-        camera_id: int,
+        camera_id: UUID,
         current_active_user: CurrentActiveUserDependency,
         db: DatabaseDependency,
 ):
@@ -67,7 +68,7 @@ def create_camera(
 
 @router.delete('/{camera_id}', status_code=status.HTTP_204_NO_CONTENT)
 def delete_camera(
-        camera_id: int,
+        camera_id: UUID,
         db: DatabaseDependency,
         current_active_user: CurrentActiveUserDependency
 ):
@@ -77,6 +78,6 @@ def delete_camera(
     if not camera:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Camera not found')
     camera.is_active = False
-    camera.deleted_at = datetime.now()
+    camera.deleted_at = datetime.utcnow()
     db.commit()
     return

@@ -79,7 +79,7 @@ def update_user(user_id: int,
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     user.is_superuser = user_update.is_superuser
-    user.updated_at = datetime.now()
+    user.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(user)
     return user
@@ -93,6 +93,6 @@ def delete_user(user_id: int, db: DatabaseDependency, current_active_user: Curre
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
     user.is_active = False
-    user.deleted_at = datetime.now()
+    user.deleted_at = datetime.utcnow()
     db.commit()
     return
